@@ -9,8 +9,12 @@ public class Retweet extends Tweet{
         this.referredTweetID = referredTweetID;
     }
 
-    public Retweet(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, String referredTweetID,int retweetCount,int replyCount,int likeCount,ArrayList<Tweet> replies) {
-        super(text, photo, video, tweetDate, authorUsername, hashtag,replyCount,retweetCount,likeCount,replies);
+    public void setReferredTweetID(String referredTweetID) {
+        this.referredTweetID = referredTweetID;
+    }
+
+    public Retweet(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, String referredTweetID, int retweetCount, int replyCount, int likeCount) {
+        super(text, photo, video, tweetDate, authorUsername, hashtag,replyCount,retweetCount,likeCount);
         this.referredTweetID = referredTweetID;
     }
 
