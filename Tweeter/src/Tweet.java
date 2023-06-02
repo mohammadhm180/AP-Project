@@ -29,9 +29,6 @@ public class Tweet {
         likeCount=0;
     }
 
-    public int getLikeCount() {
-        return likeCount;
-    }
 
     public Tweet(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, int replyCount, int retweetCount, int likeCount) {
         this.tweetID = UUID.randomUUID().toString();
@@ -94,6 +91,20 @@ public class Tweet {
 
     public ArrayList<String> getHashtag() {
         return hashtag;
+    }
+    public int getLikeCount() {
+        return likeCount;
+    }
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
+    public void setVideo(byte[] video) {
+        this.video = video;
     }
 }
 
