@@ -8,9 +8,8 @@ public class Reply extends Tweet{
         super(text, photo, video, tweetDate, authorUsername, hashtag);
         this.referredTweetID = referredTweetID;
     }
-
-    public Reply(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, String referredTweetID,int retweetCount,int replyCount,int likeCount,ArrayList<Tweet> replies) {
-        super(text, photo, video, tweetDate, authorUsername, hashtag, retweetCount, replyCount, likeCount,replies);
+    public Reply(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, String referredTweetID,int retweetCount,int replyCount,int likeCount) {
+        super(text, photo, video, tweetDate, authorUsername, hashtag, retweetCount, replyCount, likeCount);
         this.referredTweetID = referredTweetID;
     }
 
