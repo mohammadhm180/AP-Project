@@ -3,10 +3,8 @@ import io.jsonwebtoken.io.IOException;
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
+
 /**/
 public class Client {
     public static void main(String[] args) throws java.io.IOException, ClassNotFoundException {
@@ -18,10 +16,10 @@ public class Client {
         } catch (IOException | java.io.IOException exception) {
             exception.printStackTrace();
         }
-        ObjectOutputStream OOS=new ObjectOutputStream(server.getOutputStream());
-        ObjectInputStream OIS=new ObjectInputStream(server.getInputStream());
-        EnterProgram enterProgram=new EnterProgram(file,OOS,OIS);
-        Menu menu=new Menu(enterProgram,OOS,OIS);
+        ObjectOutputStream OOS = new ObjectOutputStream(server.getOutputStream());
+        ObjectInputStream OIS = new ObjectInputStream(server.getInputStream());
+        EnterProgram enterProgram = new EnterProgram(file, OOS, OIS);
+        Menu menu = new Menu(enterProgram, OOS, OIS);
         //checking if token already exist in local file
         if (file.exists()) {
             ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
@@ -35,9 +33,9 @@ public class Client {
         } else {
             OOS.writeObject(new String("checkSignInToken"));
             OOS.writeObject(token);
-            String result=(String) OIS.readObject();
-            if(result.equals("success")){
-                User client=(User) OIS.readObject();
+            String result = (String) OIS.readObject();
+            if (result.equals("success")) {
+                User client = (User) OIS.readObject();
                 menu.setClient(client);
                 menu.setToken(token);
             } else {
@@ -58,91 +56,30 @@ class Menu {
     EnterProgram enterProgram;
     ObjectInputStream OIS;
     ObjectOutputStream OOS;
-    public Menu(EnterProgram enterProgram,ObjectOutputStream OOS,ObjectInputStream OIS) {
+
+    public Menu(EnterProgram enterProgram, ObjectOutputStream OOS, ObjectInputStream OIS) {
         this.token = null;
         this.user = null;
-        this.enterProgram=enterProgram;
-        this.OIS=OIS;
-        this.OOS=OOS;
+        this.enterProgram = enterProgram;
+        this.OIS = OIS;
+        this.OOS = OOS;
         enterProgram.setMenu(this);
     }
-    public boolean checkToken(ObjectInputStream in, ObjectOutputStream out) {
-        try {
-            out.writeObject("checkToken");
-            String result = (String) in.readObject();
-            return result.equals("valid token");
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-            return false;
-        } catch (ClassNotFoundException e) {
-            System.err.println("class not found");
-            return false;
-        }
-    }
 
-    public int compare(Tweet t1,Tweet t2) {
-        LocalDateTime d1 = t1.getTweetDate();
-        LocalDateTime d2 = t2.getTweetDate();
-        if (d1.getYear() > d2.getYear())
-            return 1;
-        else if (d1.getYear() < d2.getYear()) {
-            return -1;
-        } else if (d2.getMonthValue() > d1.getMonthValue()) {
-            return 1;
-        } else if (d2.getMonthValue() < d1.getMonthValue()) {
-            return -1;
-        } else if (d2.getDayOfMonth() > d1.getDayOfMonth()) {
-            return 1;
-        } else if (d2.getDayOfMonth() < d1.getDayOfMonth()) {
-            return -1;
-        } else if (d2.getHour() > d1.getHour()){
-            return 1;
-        } else if (d2.getHour() < d1.getHour()) {
-            return -1;
-        } else if (d2.getMinute() > d1.getMinute()) {
-            return 1;
-        } else if (d2.getMinute() < d1.getMinute()) {
-            return -1;
-        } else return 0;
-    }
-
-    public void sortByDate(ArrayList<Tweet> tweets) {
-        for(int i=0;i<tweets.size()-1;i++){
-            for(int j=0;j<tweets.size()-i-1;j++){
-                if(compare(tweets.get(j),tweets.get(j+1))==-1){
-                    Tweet tmp = tweets.get(j);
-                    tweets.set(i,tweets.get(j+1));
-                    tweets.set(i+1,tmp);
-                }
-            }
-        }
-    }
     public void startMenu() throws ClassNotFoundException, java.io.IOException {
         Scanner scanner = new Scanner(System.in);
         String choice;
         while (true) {
-            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-show replies");
+            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-show replies\n21-like\n22-unlike\n23-add vote\n24-vote");
             choice = scanner.nextLine();
 
 
             if (choice.equals("1")) {
-                if (!checkToken(OIS, OOS)) {
-                    System.out.println("invalid token");
-                    enterProgram.enter();
-                } else {
-                    String command = "showTimeline";
-                    OOS.writeObject(command);
-                    ArrayList<Tweet> timeline = (ArrayList<Tweet>) OIS.readObject();
-                    for (User following : user.getFollowings()) {
-                        for (Tweet tweet : following.getTweets()) {
-                            timeline.add(tweet);
-                        }
-                    }
-                    sortByDate(timeline);
-                    //show tweets
-                }
+                //first we call fetch client to get new following or new tweets or followings
+                //check not showing blocked users favstar
+
             } else if (choice.equals("2")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -155,34 +92,39 @@ class Menu {
                     videoDirectory = scanner.nextLine();
                     try {
                         File photoFile = new File(photoDirectory);
-                        FileInputStream in = new FileInputStream(photoFile);
-                        byte[] photo = new byte[(int) photoFile.length()];
-                        in.read(photo);
+                        byte[] photo = null;
+                        if (photoFile.exists()) {
+                            FileInputStream in = new FileInputStream(photoFile);
+                            photo = new byte[(int) photoFile.length()];
+                            in.read(photo);
+                        }
+
                         File videoFile = new File(videoDirectory);
-                        in = new FileInputStream(videoFile);
-                        byte[] video = new byte[(int) videoFile.length()];
-                        in.read(video);
-                        in.close();
-                        //be ja new ArrayList bayad find hashtag seda bezani
-                        Tweet tweet = new Tweet(text, photo, video, LocalDateTime.now(), token, new ArrayList<>());
+                        byte[] video = null;
+                        if (videoFile.exists()) {
+                            FileInputStream in = new FileInputStream(videoFile);
+                            video = new byte[(int) videoFile.length()];
+                            in.read(video);
+                            in.close();
+                        }
+                        Tweet tweet = new Tweet(text, photo, video, LocalDateTime.now(), user.getUsername(), extractHashtags(text));
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(tweet);
-                        if((OIS.readObject()).equals("tweeted successfully")){
+                        if ((OIS.readObject()).equals("tweeted successfully")) {
                             user.getTweets().add(tweet);
                         }
                     } catch (FileNotFoundException e) {
                         System.err.println("file not found");
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("class not found");
                     }
                 }
 
             } else if (choice.equals("3")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -201,14 +143,13 @@ class Menu {
                         OIS.readObject();
                     } catch (java.io.IOException e) {
                         System.err.println("file not found");
-                    }
-                    catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                 }
 
             } else if (choice.equals("4")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -226,16 +167,14 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(user);
                         OIS.readObject();
-                    }
-                    catch (java.io.IOException e) {
+                    } catch (java.io.IOException e) {
                         System.err.println("file not found");
-                    }
-                    catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                 }
             } else if (choice.equals("5")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -250,13 +189,12 @@ class Menu {
                         OIS.readObject();
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("class not found");
                     }
                 }
             } else if (choice.equals("6")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -265,7 +203,7 @@ class Menu {
                     }
                 }
             } else if (choice.equals("7")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -274,16 +212,24 @@ class Menu {
                     }
                 }
             } else if (choice.equals("8")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
                     System.out.print("tweetID: ");
                     String tweetID = scanner.nextLine();
-                    //should find the corresponding tweet to create the retweet object
+                    OOS.writeObject(new String("getTweet"));
+                    OOS.writeObject(tweetID);
+                    Tweet tweet=(Tweet) OIS.readObject();
+                    Retweet retweet=new Retweet(tweet.getText(),tweet.getPhoto(),tweet.getVideo(),tweet.getTweetDate(),user.getUsername(),tweet.getHashtag(),tweet.getTweetID(),tweet.getRetweetCount(),tweet.getReplyCount(),tweet.getLikeCount());
+                    OOS.writeObject(new String("addTweet"));
+                    OOS.writeObject(retweet);
+                    if ((OIS.readObject()).equals("tweeted successfully")) {
+                        user.getTweets().add(retweet);
+                    }
                 }
             } else if (choice.equals("9")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -298,33 +244,38 @@ class Menu {
                     videoDirectory = scanner.nextLine();
                     try {
                         File photoFile = new File(photoDirectory);
-                        FileInputStream in = new FileInputStream(photoFile);
-                        byte[] photo = new byte[(int) photoFile.length()];
-                        in.read(photo);
+                        byte[] photo = null;
+                        if (photoFile.exists()) {
+                            FileInputStream in = new FileInputStream(photoFile);
+                            photo = new byte[(int) photoFile.length()];
+                            in.read(photo);
+                        }
+
                         File videoFile = new File(videoDirectory);
-                        in = new FileInputStream(videoFile);
-                        byte[] video = new byte[(int) videoFile.length()];
-                        in.read(video);
-                        in.close();
-                        //be ja new ArrayList bayad find hashtag seda bezani
-                        Quote quote = new Quote(text, photo, video, LocalDateTime.now(), user.getUsername(), new ArrayList<>(), referredTweetID);
+                        byte[] video = null;
+                        if (videoFile.exists()) {
+                            FileInputStream in = new FileInputStream(videoFile);
+                            video = new byte[(int) videoFile.length()];
+                            in.read(video);
+                            in.close();
+                        }
+                        Quote quote = new Quote(text, photo, video, LocalDateTime.now(), user.getUsername(),extractHashtags(text), referredTweetID);
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(quote);
-                        if((OIS.readObject()).equals("tweeted successfully")){
+                        if ((OIS.readObject()).equals("tweeted successfully")) {
                             user.getTweets().add(quote);
                         }
                     } catch (FileNotFoundException e) {
                         System.err.println("file not found");
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.out.println("class not found");
                     }
                 }
             } else if (choice.equals("10")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -339,32 +290,38 @@ class Menu {
                     videoDirectory = scanner.nextLine();
                     try {
                         File photoFile = new File(photoDirectory);
-                        FileInputStream in = new FileInputStream(photoFile);
-                        byte[] photo = new byte[(int) photoFile.length()];
-                        in.read(photo);
+                        byte[] photo = null;
+                        if (photoFile.exists()) {
+                            FileInputStream in = new FileInputStream(photoFile);
+                            photo = new byte[(int) photoFile.length()];
+                            in.read(photo);
+                        }
+
                         File videoFile = new File(videoDirectory);
-                        in = new FileInputStream(videoFile);
-                        byte[] video = new byte[(int) videoFile.length()];
-                        in.read(video);
-                        in.close();
-                        //be ja new ArrayList bayad find hashtag seda bezani
-                        Reply reply = new Reply(text, photo, video, LocalDateTime.now(), user.getUsername(), new ArrayList<>(), referredTweetID);
+                        byte[] video = null;
+                        if (videoFile.exists()) {
+                            FileInputStream in = new FileInputStream(videoFile);
+                            video = new byte[(int) videoFile.length()];
+                            in.read(video);
+                            in.close();
+                        }
+                        Reply reply = new Reply(text, photo, video, LocalDateTime.now(), user.getUsername(),extractHashtags(text), referredTweetID);
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(reply);
-                        if((OIS.readObject()).equals("tweeted successfully")){
+                        if ((OIS.readObject()).equals("tweeted successfully")) {
                             user.getTweets().add(reply);
                         }
                     } catch (FileNotFoundException e) {
                         System.err.println("file not found");
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    } catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.out.println("class not found");
                     }
                 }
             } else if (choice.equals("11")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -376,16 +333,19 @@ class Menu {
                         OOS.writeObject(user.getUsername());
                         OOS.writeObject(username);
                         OIS.readObject();
-                    }
-                    catch (java.io.IOException e){
+                        //adding to user followings
+                        OOS.writeObject(new String("fetchUser"));
+                        OOS.writeObject(username);
+                        User following = (User) OIS.readObject();
+                        user.getFollowings().add(following);
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("not found");
                     }
                 }
             } else if (choice.equals("12")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -397,16 +357,22 @@ class Menu {
                         OOS.writeObject(user.getUsername());
                         OOS.writeObject(username);
                         OIS.readObject();
-                    }
-                    catch (java.io.IOException e){
+                        //remove from users following
+                        Iterator<User> following = user.getFollowings().iterator();
+                        while (following.hasNext()) {
+                            if (following.next().getUsername().equals(username)) {
+                                following.remove();
+                                break;
+                            }
+                        }
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("?");
                     }
                 }
             } else if (choice.equals("13")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -417,17 +383,13 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(user.getUsername());
                         OOS.writeObject(username);
-                        OIS.readObject();
-                    }
-                    catch (java.io.IOException e){
+                        user.getBlockedUsers().add(username);
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e){
-                        System.err.println("?");
                     }
                 }
             } else if (choice.equals("14")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -438,17 +400,13 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(user.getUsername());
                         OOS.writeObject(username);
-                        OIS.readObject();
-                    }
-                    catch (java.io.IOException e){
+                        user.getBlockedUsers().remove(username);
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e){
-                        System.err.println("?");
                     }
                 }
             } else if (choice.equals("15")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -459,13 +417,14 @@ class Menu {
                     String command = "addDirect";
                     try {
                         OOS.writeObject(command);
-                        OOS.writeObject(new Message(user.getUsername(),receiver,text,LocalDateTime.now()));
-                    }catch (java.io.IOException e){
+                        OOS.writeObject(new Message(user.getUsername(), receiver, text, LocalDateTime.now()));
+                        //add to user directs
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
                     }
                 }
             } else if (choice.equals("16")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -473,8 +432,8 @@ class Menu {
                     String tweetID = scanner.nextLine();
                     String command = "removeTweet";
                     Tweet t = null;
-                    for(Tweet tweet:user.getTweets()){
-                        if(tweet.getTweetID().equals(tweetID)){
+                    for (Tweet tweet : user.getTweets()) {
+                        if (tweet.getTweetID().equals(tweetID)) {
                             t = tweet;
                             break;
                         }
@@ -483,14 +442,15 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         OIS.readObject();
-                    }catch (java.io.IOException e){
+                        //remove from user
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("class not found");
                     }
                 }
             } else if (choice.equals("17")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -498,8 +458,8 @@ class Menu {
                     String retweetID = scanner.nextLine();
                     String command = "removeTweet";
                     Tweet t = null;
-                    for(Tweet tweet:user.getTweets()){
-                        if(tweet.getTweetID().equals(retweetID)){
+                    for (Tweet tweet : user.getTweets()) {
+                        if (tweet.getTweetID().equals(retweetID)) {
                             t = tweet;
                             break;
                         }
@@ -508,14 +468,15 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         OIS.readObject();
-                    }catch (java.io.IOException e){
+                        //remove from user
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("class not found");
                     }
                 }
             } else if (choice.equals("18")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -523,8 +484,8 @@ class Menu {
                     String quoteID = scanner.nextLine();
                     String command = "removeTweet";
                     Tweet t = null;
-                    for(Tweet tweet:user.getTweets()){
-                        if(tweet.getTweetID().equals(quoteID)){
+                    for (Tweet tweet : user.getTweets()) {
+                        if (tweet.getTweetID().equals(quoteID)) {
                             t = tweet;
                             break;
                         }
@@ -533,14 +494,15 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         OIS.readObject();
-                    }catch (java.io.IOException e){
+                        //remove from user
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("class not found");
                     }
                 }
             } else if (choice.equals("19")) {
-                if(!checkToken(OIS,OOS)){
+                if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
                     enterProgram.enter();
                 } else {
@@ -548,8 +510,8 @@ class Menu {
                     String replyID = scanner.nextLine();
                     String command = "removeTweet";
                     Tweet t = null;
-                    for(Tweet tweet:user.getTweets()){
-                        if(tweet.getTweetID().equals(replyID)){
+                    for (Tweet tweet : user.getTweets()) {
+                        if (tweet.getTweetID().equals(replyID)) {
                             t = tweet;
                             break;
                         }
@@ -558,16 +520,146 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         OIS.readObject();
-                    }catch (java.io.IOException e){
+                        //remove from user
+                    } catch (java.io.IOException e) {
                         e.printStackTrace();
-                    }catch (ClassNotFoundException e){
+                    } catch (ClassNotFoundException e) {
                         System.err.println("class not found");
                     }
                 }
             } else if (choice.equals("20")) {
+                if (!checkToken(OIS, OOS)) {
+                    System.out.println("invalid token");
+                    enterProgram.enter();
+                } else {
+                    System.out.println("enter tweetID to show replies:");
+                    String tweetID = scanner.nextLine();
+                    OOS.writeObject(tweetID);
+                    ArrayList<Reply> replies = (ArrayList<Reply>) OIS.readObject();
+                    for (Reply reply : replies)
+                        showTweet(reply);
+                }
+            } else if (choice.equals("21")) {
+                String command = "like";
+                System.out.print("tweetID: ");
+                String tweetID = scanner.nextLine();
+                OOS.writeObject(command);
+                OOS.writeObject(tweetID);
+            } else if (choice.equals("22")) {
+                String command = "unlike";
+                System.out.print("tweetID: ");
+                String tweetID = scanner.nextLine();
+                OOS.writeObject(command);
+                OOS.writeObject(tweetID);
+            } else if (choice.equals("23")) {
+                if (!checkToken(OIS, OOS)) {
+                    System.out.println("invalid token");
+                    enterProgram.enter();
+                } else {
+                    String text, photoDirectory, videoDirectory;
+                    System.out.print("text: ");
+                    text = scanner.nextLine();
+                    System.out.print("photo: ");
+                    photoDirectory = scanner.nextLine();
+                    System.out.println("video: ");
+                    System.out.print("option 1: ");
+                    String option1 = scanner.nextLine();
+                    System.out.print("option 2: ");
+                    String option2 = scanner.nextLine();
+                    System.out.print("option 3: ");
+                    String option3 = scanner.nextLine();
+                    System.out.print("option 4: ");
+                    String option4 = scanner.nextLine();
+                    videoDirectory = scanner.nextLine();
+                    try {
+                        File photoFile = new File(photoDirectory);
+                        byte[] photo = null;
+                        if (photoFile.exists()) {
+                            FileInputStream in = new FileInputStream(photoFile);
+                            photo = new byte[(int) photoFile.length()];
+                            in.read(photo);
+                        }
+
+                        File videoFile = new File(videoDirectory);
+                        byte[] video = null;
+                        if (videoFile.exists()) {
+                            FileInputStream in = new FileInputStream(videoFile);
+                            video = new byte[(int) videoFile.length()];
+                            in.read(video);
+                            in.close();
+                        }
+                        Vote vote = new Vote(text, photo, video, LocalDateTime.now(), user.getUsername(), extractHashtags(text), option1, option2, option3, option4);
+                        String command = "addTweet";
+                        OOS.writeObject(command);
+                        OOS.writeObject(vote);
+                        if ((OIS.readObject()).equals("tweeted successfully")) {
+                            user.getTweets().add(vote);
+                        }
+                    } catch (FileNotFoundException e) {
+                        System.err.println("file not found");
+                    } catch (java.io.IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        System.err.println("class not found");
+                    }
+                }
+            } else if (choice.equals("24")) {
+                if (!checkToken(OIS, OOS)) {
+                    System.out.println("invalid token");
+                    enterProgram.enter();
+                } else {
+                    System.out.println("voteID:");
+                    String voteID = scanner.nextLine();
+                    System.out.println("option number:");
+                    Integer optionNumber = scanner.nextInt();
+                    scanner.nextLine();
+                    OOS.writeObject("vote");
+                    OOS.writeObject(voteID);
+                    OOS.writeObject(optionNumber);
+                }
+            } else if (choice.equals("25")) {
+
+            } else if (choice.equals("n")) {
                 break;
             } else {
                 System.out.println("wrong input");
+            }
+        }
+    }
+
+    public boolean checkToken(ObjectInputStream in, ObjectOutputStream out) {
+        try {
+            out.writeObject("checkToken");
+            String result = (String) in.readObject();
+            return result.equals("valid token");
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (ClassNotFoundException e) {
+            System.err.println("class not found");
+            return false;
+        }
+    }
+
+    public ArrayList<String> extractHashtags(String text) {
+        ArrayList<String> words = new ArrayList<String>(Arrays.asList(text.split("\\s+")));
+        ArrayList<String> hashtags = new ArrayList<String>();
+        for (String word : words) {
+            if (word.startsWith("#")) {
+                hashtags.add(word);
+            }
+        }
+        return hashtags;
+    }
+
+    public void sortByDate(ArrayList<Tweet> tweets) {
+        for (int i = 0; i < tweets.size() - 1; i++) {
+            for (int j = 0; j < tweets.size() - i - 1; j++) {
+                if (tweets.get(j).getTweetDate().compareTo(tweets.get(j + 1).getTweetDate()) < 0) {
+                    Tweet tmp = tweets.get(j);
+                    tweets.set(i, tweets.get(j + 1));
+                    tweets.set(i + 1, tmp);
+                }
             }
         }
     }
@@ -579,81 +671,83 @@ class Menu {
     public void setClient(User user) {
         this.user = user;
     }
+
     public void showTweet(Tweet tweet) throws java.io.IOException, ClassNotFoundException {
-        if(tweet instanceof Retweet){
+        if (tweet instanceof Retweet) {
             //getting referred tweet
             OOS.writeObject(new String("getTweet"));
             OOS.writeObject(new String(((Retweet) tweet).getReferredTweetID()));
-            Tweet referredTweet=(Tweet) OIS.readObject();
+            Tweet referredTweet = (Tweet) OIS.readObject();
             //getting retweet owner name
             OOS.writeObject("getName");
             OOS.writeObject(tweet.getAuthorUsername());
-            String name=(String) OIS.readObject();
-            System.out.println(name+" retweeted");
+            String name = (String) OIS.readObject();
+            System.out.println(name + " retweeted");
             //showing referred tweet
             showTweet(referredTweet);
-        } else if(tweet instanceof Quote){
+        } else if (tweet instanceof Quote) {
             //getting referred tweet
             OOS.writeObject(new String("getTweet"));
             OOS.writeObject(new String(((Quote) tweet).getReferredTweetID()));
-            Tweet referredTweet=(Tweet) OIS.readObject();
+            Tweet referredTweet = (Tweet) OIS.readObject();
             //getting quote owner
             OOS.writeObject("getName");
             OOS.writeObject(tweet.getAuthorUsername());
-            String quoteOwnerName=(String) OIS.readObject();
+            String quoteOwnerName = (String) OIS.readObject();
             //getting referred tweet owner names
             OOS.writeObject("getName");
             OOS.writeObject(referredTweet.getAuthorUsername());
-            String referredOwnerName=(String) OIS.readObject();
+            String referredOwnerName = (String) OIS.readObject();
             //show result
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(quoteOwnerName+"  "+"@"+tweet.getAuthorUsername());
+            System.out.println(quoteOwnerName + "  " + "@" + tweet.getAuthorUsername());
             System.out.println(tweet.getText());
             //show referred tweet
             System.out.println("----------------------------------------------------------------------------------------");
             System.out.println(referredTweet.getTweetID());
             System.out.println();
-            System.out.println(referredOwnerName+"  "+"@"+referredTweet.getAuthorUsername());
+            System.out.println(referredOwnerName + "  " + "@" + referredTweet.getAuthorUsername());
             System.out.println(tweet.getText());
             System.out.println("----------------------------------------------------------------------------------------");
-            System.out.println("replies:"+tweet.getReplyCount()+"  retweets:"+tweet.getRetweetCount()+"  likes"+tweet.getLikeCount());
+            System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes" + tweet.getLikeCount());
             System.out.println();
-        } else if(tweet instanceof Reply){
+        } else if (tweet instanceof Reply) {
             OOS.writeObject("getName");
             OOS.writeObject(tweet.getAuthorUsername());
-            String replyOwnerName=(String) OIS.readObject();
+            String replyOwnerName = (String) OIS.readObject();
             OOS.writeObject("getWriterUsername");
             OOS.writeObject(new String(((Reply) tweet).getReferredTweetID()));
-            String referredOwnerUsername=(String) OIS.readObject();
+            String referredOwnerUsername = (String) OIS.readObject();
             //show reply
             System.out.println(tweet.getTweetID());
             System.out.println();
             System.out.println(replyOwnerName);
-            System.out.println("replying to  @"+referredOwnerUsername);
+            System.out.println("replying to  @" + referredOwnerUsername);
             System.out.println(tweet.getText());
-            System.out.println("replies:"+tweet.getReplyCount()+"  retweets:"+tweet.getRetweetCount()+"  likes"+tweet.getLikeCount());
+            System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes" + tweet.getLikeCount());
             System.out.println();
         } else {
             System.out.println(tweet.getTweetID());
             System.out.println();
             System.out.println(tweet.getText());
-            System.out.println("replies:"+tweet.getReplyCount()+"  retweets:"+tweet.getRetweetCount()+"  likes"+tweet.getLikeCount());
+            System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes" + tweet.getLikeCount());
             System.out.println();
         }
     }
 }
-class EnterProgram{
+
+class EnterProgram {
     File file;
     ObjectInputStream OIS;
     ObjectOutputStream OOS;
     Menu menu;
 
     public EnterProgram(File file, ObjectOutputStream OOS, ObjectInputStream OIS) {
-        this.file=file;
-        this.OOS=OOS;
-        this.OIS=OIS;
-        this.menu=null;
+        this.file = file;
+        this.OOS = OOS;
+        this.OIS = OIS;
+        this.menu = null;
     }
 
     public void enter() throws java.io.IOException, ClassNotFoundException {
@@ -697,7 +791,7 @@ class EnterProgram{
                         menu.setClient(client);
                         //save token to local directory
                         file.getParentFile().mkdirs();
-                        ObjectOutputStream objectOutputStream=new ObjectOutputStream(new FileOutputStream(file));
+                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(file));
                         objectOutputStream.writeObject(token);
                         objectOutputStream.close();
                         break;
@@ -708,7 +802,7 @@ class EnterProgram{
                     System.out.println("wrong input");
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
-                } catch (java.io.IOException e){
+                } catch (java.io.IOException e) {
                     e.printStackTrace();
                 }
             } else if (choice.equals("2")) {
@@ -730,7 +824,7 @@ class EnterProgram{
                     menu.setClient(client);
                     //save token to local directory
                     file.getParentFile().mkdirs();
-                    ObjectOutputStream objectOutputStream=new ObjectOutputStream(new FileOutputStream(file));
+                    ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(file));
                     objectOutputStream.writeObject(token);
                     objectOutputStream.close();
                     break;
