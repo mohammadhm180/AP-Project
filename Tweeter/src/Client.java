@@ -84,7 +84,7 @@ class Menu {
         Scanner scanner = new Scanner(System.in);
         String choice;
         while (true) {
-            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-exit");
+            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-show replies");
             choice = scanner.nextLine();
 
 
@@ -514,6 +514,18 @@ class Menu {
                     }
                 }
             } else if (choice.equals("20")) {
+                if(!checkToken(OIS,OOS)){
+                    System.out.println("invalid token");
+                    enterProgram.enter();
+                } else {
+                    System.out.println("enter tweetID to show replies:");
+                    String tweetID=scanner.nextLine();
+                    OOS.writeObject(tweetID);
+                    ArrayList<Reply> replies=(ArrayList<Reply>) OIS.readObject();
+                    for (Reply reply:replies)
+                        showTweet(reply);
+                }
+            } else if (choice.equals("n")) {
                 break;
             } else {
                 System.out.println("wrong input");
@@ -527,6 +539,69 @@ class Menu {
 
     public void setClient(User user) {
         this.user = user;
+    }
+    public void showTweet(Tweet tweet) throws java.io.IOException, ClassNotFoundException {
+        if(tweet instanceof Retweet){
+            //getting referred tweet
+            OOS.writeObject(new String("getTweet"));
+            OOS.writeObject(new String(((Retweet) tweet).getReferredTweetID()));
+            Tweet referredTweet=(Tweet) OIS.readObject();
+            //getting retweet owner name
+            OOS.writeObject("getName");
+            OOS.writeObject(tweet.getAuthorUsername());
+            String name=(String) OIS.readObject();
+            System.out.println(name+" retweeted");
+            //showing referred tweet
+            showTweet(referredTweet);
+        } else if(tweet instanceof Quote){
+            //getting referred tweet
+            OOS.writeObject(new String("getTweet"));
+            OOS.writeObject(new String(((Quote) tweet).getReferredTweetID()));
+            Tweet referredTweet=(Tweet) OIS.readObject();
+            //getting quote owner
+            OOS.writeObject("getName");
+            OOS.writeObject(tweet.getAuthorUsername());
+            String quoteOwnerName=(String) OIS.readObject();
+            //getting referred tweet owner names
+            OOS.writeObject("getName");
+            OOS.writeObject(referredTweet.getAuthorUsername());
+            String referredOwnerName=(String) OIS.readObject();
+            //show result
+            System.out.println(tweet.getTweetID());
+            System.out.println();
+            System.out.println(quoteOwnerName+"  "+"@"+tweet.getAuthorUsername());
+            System.out.println(tweet.getText());
+            //show referred tweet
+            System.out.println("----------------------------------------------------------------------------------------");
+            System.out.println(referredTweet.getTweetID());
+            System.out.println();
+            System.out.println(referredOwnerName+"  "+"@"+referredTweet.getAuthorUsername());
+            System.out.println(tweet.getText());
+            System.out.println("----------------------------------------------------------------------------------------");
+            System.out.println("replies:"+tweet.getReplyCount()+"  retweets:"+tweet.getRetweetCount()+"  likes"+tweet.getLikeCount());
+            System.out.println();
+        } else if(tweet instanceof Reply){
+            OOS.writeObject("getName");
+            OOS.writeObject(tweet.getAuthorUsername());
+            String replyOwnerName=(String) OIS.readObject();
+            OOS.writeObject("getWriterUsername");
+            OOS.writeObject(new String(((Reply) tweet).getReferredTweetID()));
+            String referredOwnerUsername=(String) OIS.readObject();
+            //show reply
+            System.out.println(tweet.getTweetID());
+            System.out.println();
+            System.out.println(replyOwnerName);
+            System.out.println("replying to  @"+referredOwnerUsername);
+            System.out.println(tweet.getText());
+            System.out.println("replies:"+tweet.getReplyCount()+"  retweets:"+tweet.getRetweetCount()+"  likes"+tweet.getLikeCount());
+            System.out.println();
+        } else {
+            System.out.println(tweet.getTweetID());
+            System.out.println();
+            System.out.println(tweet.getText());
+            System.out.println("replies:"+tweet.getReplyCount()+"  retweets:"+tweet.getRetweetCount()+"  likes"+tweet.getLikeCount());
+            System.out.println();
+        }
     }
 }
 class EnterProgram{

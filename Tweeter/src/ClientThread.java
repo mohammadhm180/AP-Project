@@ -217,6 +217,36 @@ public class ClientThread implements Runnable{
                 } catch (java.sql.SQLException e) {
                     e.printStackTrace();
                 }
+            } else if(choice.equals("getReplies")){
+                try {
+                    getReplies();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if(choice.equals("getTweet")){
+                try {
+                    getTweet();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if(choice.equals("getName")){
+                try {
+                    getName();
+                } catch (IOException | ClassNotFoundException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if(choice.equals("getWriterUsername")){
+                try {
+                    getWriterUsername();
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -360,17 +390,99 @@ public class ClientThread implements Runnable{
             } catch (SQLException e){
                 //ignore
             }
-            try {
-                Retweet retweet=database.getRetweet(tweetID);
-                tweets.add(retweet);
-                continue;
-            } catch (SQLException e){
-                //ignore
-            }
         }
         hashtagStm.close();
         ObjectOutputStream OOS=new ObjectOutputStream(client.getOutputStream());
         OOS.writeObject(tweets);
+    }
+    //gets a username and return full name(uses while showing tweets)
+    public void getName() throws IOException, ClassNotFoundException, SQLException {
+        String username=(String) OIS.readObject();
+        PreparedStatement stm=conn.prepareStatement("SELECT * FROM users WHERE username=?");
+        stm.setString(1,username);
+        ResultSet rs=stm.executeQuery();
+        rs.next();
+        String fullName=(rs.getString("firstName")+" "+rs.getString("lastName"));
+        stm.close();
+        OOS.writeObject(fullName);
+    }
+    //gets a tweetID and return username of its writer(uses when showing reply)
+    public void getWriterUsername() throws IOException, ClassNotFoundException {
+        String tweetID=(String) OIS.readObject();
+        try {
+            PreparedStatement stm=conn.prepareStatement("SELECT authorUsername FROM tweets WHERE tweetID=?");
+            stm.setString(1,tweetID);
+            ResultSet rs=stm.executeQuery();
+            rs.next();
+            OOS.writeObject(rs.getString("authorUsername"));
+            stm.close();
+            return;
+        } catch (SQLException e){
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            PreparedStatement stm=conn.prepareStatement("SELECT authorUsername FROM quotes WHERE quoteID=?");
+            stm.setString(1,tweetID);
+            ResultSet rs=stm.executeQuery();
+            rs.next();
+            OOS.writeObject(rs.getString("authorUsername"));
+            stm.close();
+            return;
+        } catch (SQLException e){
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            PreparedStatement stm=conn.prepareStatement("SELECT authorUsername FROM replies WHERE replyID=?");
+            stm.setString(1,tweetID);
+            ResultSet rs=stm.executeQuery();
+            rs.next();
+            OOS.writeObject(rs.getString("authorUsername"));
+            stm.close();
+            return;
+        } catch (SQLException e){
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void getTweet() throws IOException, ClassNotFoundException {
+        String tweetID=(String) OIS.readObject();
+        try {
+            Tweet tweet=database.getTweet(tweetID);
+            OOS.writeObject(tweet);
+            return;
+        } catch (SQLException e){
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            Retweet retweet=database.getRetweet(tweetID);
+            OOS.writeObject(retweet);
+            return;
+        } catch (SQLException e){
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            Quote quote=database.getQuote(tweetID);
+            OOS.writeObject(quote);
+            return;
+        } catch (SQLException e){
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void getReplies() throws IOException, ClassNotFoundException, SQLException {
+        String tweetID=(String) OIS.readObject();
+        ArrayList<Reply> replies=database.getReplies(tweetID);
+        OOS.writeObject(replies);
     }
     public String setBio(User user) throws SQLException {
         /*the bio is set in frontend and the user object is passed to this method to check the conditions for bio*/
