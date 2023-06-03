@@ -1,17 +1,15 @@
 import io.jsonwebtoken.io.IOException;
-
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class Server {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         //initializing server and database
         Database database=new Database();
+        database.createTables();
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(8000);
