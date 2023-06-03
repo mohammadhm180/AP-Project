@@ -189,8 +189,7 @@ public class ClientThread implements Runnable {
             } else if (choice.equals("removeTweet")) {
                 try {
                     Tweet tweet = (Tweet) OIS.readObject();
-                    String result = removeTweet(tweet);
-                    OOS.writeObject(result);
+                    removeTweet(tweet);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {
@@ -421,13 +420,6 @@ public class ClientThread implements Runnable {
                 //ignore
             }
             try {
-                Retweet retweet = database.getRetweet(tweetID);
-                tweets.add(retweet);
-                continue;
-            } catch (SQLException e) {
-                //ignore
-            }
-            try {
                 Quote quote = database.getQuote(tweetID);
                 tweets.add(quote);
                 continue;
@@ -437,6 +429,13 @@ public class ClientThread implements Runnable {
             try {
                 Reply reply = database.getReply(tweetID);
                 tweets.add(reply);
+                continue;
+            } catch (SQLException e) {
+                //ignore
+            }
+            try {
+                Vote vote = database.getVote(tweetID);
+                tweets.add(vote);
                 continue;
             } catch (SQLException e) {
                 //ignore
@@ -482,6 +481,19 @@ public class ClientThread implements Runnable {
         }
         try {
             PreparedStatement stm = conn.prepareStatement("SELECT authorUsername FROM quotes WHERE quoteID=?");
+            stm.setString(1, tweetID);
+            ResultSet rs = stm.executeQuery();
+            rs.next();
+            OOS.writeObject(rs.getString("authorUsername"));
+            stm.close();
+            return;
+        } catch (SQLException e) {
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            PreparedStatement stm = conn.prepareStatement("SELECT authorUsername FROM votes WHERE voteID=?");
             stm.setString(1, tweetID);
             ResultSet rs = stm.executeQuery();
             rs.next();
@@ -546,6 +558,15 @@ public class ClientThread implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        try {
+            Vote vote = database.getVote(tweetID);
+            OOS.writeObject(vote);
+            return;
+        } catch (SQLException e) {
+            //ignore
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void getReplies() throws IOException, ClassNotFoundException, SQLException {
@@ -577,7 +598,13 @@ public class ClientThread implements Runnable {
         } catch (SQLException e) {
             //ignore
         }
-
+        try {
+            Vote vote = database.getVote(tweetID);
+            database.like(vote);
+            return;
+        } catch (SQLException e) {
+            //ignore
+        }
     }
 
     public void unlike() throws SQLException, IOException, ClassNotFoundException {
@@ -599,6 +626,13 @@ public class ClientThread implements Runnable {
         try {
             Reply reply = database.getReply(tweetID);
             database.unLike(reply);
+            return;
+        } catch (SQLException e) {
+            //ignore
+        }
+        try {
+            Vote vote = database.getVote(tweetID);
+            database.unLike(vote);
             return;
         } catch (SQLException e) {
             //ignore
@@ -653,19 +687,17 @@ public class ClientThread implements Runnable {
         }
     }
 
-    public String removeTweet(Tweet tweet) throws SQLException {
+    public void removeTweet(Tweet tweet) throws SQLException {
         if (tweet instanceof Retweet) {
             database.removeRetweet((Retweet) tweet);
-            return "success";
         } else if (tweet instanceof Reply) {
             database.removeReply((Reply) tweet);
-            return "success";
         } else if (tweet instanceof Quote) {
             database.removeQuote((Quote) tweet);
-            return "success";
+        }else if (tweet instanceof Vote) {
+            database.removeVote(tweet.getTweetID());
         } else {
             database.removeTweet(tweet.getTweetID());
-            return "success";
         }
     }
 

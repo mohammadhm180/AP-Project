@@ -228,7 +228,7 @@ public class Database {
             try {
                 quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("year"),quoteRs.getInt("month"),quoteRs.getInt("day"),quoteRs.getInt("hour"),quoteRs.getInt("minute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getReply(quoteRs.getString("referredTweetID")));
             } catch (SQLException e){
-                throw new SQLException();
+                //ignore
             }
         }
         if(quote==null){
@@ -429,6 +429,29 @@ public class Database {
         //removing tweet itself
         deleteStatement = conn.prepareStatement("DELETE FROM tweets WHERE tweetID = ?");
         deleteStatement.setString(1, tweetID);
+        deleteStatement.executeUpdate();
+        deleteStatement.close();
+    }
+
+    public void removeVote(String voteID) throws SQLException {
+        //removing all retweets of the tweet
+        PreparedStatement deleteStatement = conn.prepareStatement("DELETE FROM retweets WHERE referredTweetID = ?");
+        deleteStatement.setString(1, voteID);
+        deleteStatement.executeUpdate();
+
+        //removing all quotes of the tweet
+        deleteStatement = conn.prepareStatement("DELETE FROM quotes WHERE referredTweetID = ?");
+        deleteStatement.setString(1, voteID);
+        deleteStatement.executeUpdate();
+
+        //removing all replies of the tweet
+        deleteStatement = conn.prepareStatement("DELETE FROM replies WHERE referredTweetID = ?");
+        deleteStatement.setString(1, voteID);
+        deleteStatement.executeUpdate();
+
+        //removing vote itself
+        deleteStatement = conn.prepareStatement("DELETE FROM votes WHERE voteID = ?");
+        deleteStatement.setString(1, voteID);
         deleteStatement.executeUpdate();
         deleteStatement.close();
     }
