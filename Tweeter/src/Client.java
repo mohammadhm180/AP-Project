@@ -80,6 +80,43 @@ class Menu {
         }
     }
 
+    public int compare(Tweet t1,Tweet t2) {
+        LocalDateTime d1 = t1.getTweetDate();
+        LocalDateTime d2 = t2.getTweetDate();
+        if (d1.getYear() > d2.getYear())
+            return 1;
+        else if (d1.getYear() < d2.getYear()) {
+            return -1;
+        } else if (d2.getMonthValue() > d1.getMonthValue()) {
+            return 1;
+        } else if (d2.getMonthValue() < d1.getMonthValue()) {
+            return -1;
+        } else if (d2.getDayOfMonth() > d1.getDayOfMonth()) {
+            return 1;
+        } else if (d2.getDayOfMonth() < d1.getDayOfMonth()) {
+            return -1;
+        } else if (d2.getHour() > d1.getHour()){
+            return 1;
+        } else if (d2.getHour() < d1.getHour()) {
+            return -1;
+        } else if (d2.getMinute() > d1.getMinute()) {
+            return 1;
+        } else if (d2.getMinute() < d1.getMinute()) {
+            return -1;
+        } else return 0;
+    }
+
+    public void sortByDate(ArrayList<Tweet> tweets) {
+        for(int i=0;i<tweets.size()-1;i++){
+            for(int j=0;j<tweets.size()-i-1;j++){
+                if(compare(tweets.get(j),tweets.get(j+1))==-1){
+                    Tweet tmp = tweets.get(j);
+                    tweets.set(i,tweets.get(j+1));
+                    tweets.set(i+1,tmp);
+                }
+            }
+        }
+    }
     public void startMenu() throws ClassNotFoundException, java.io.IOException {
         Scanner scanner = new Scanner(System.in);
         String choice;
@@ -89,7 +126,21 @@ class Menu {
 
 
             if (choice.equals("1")) {
-
+                if (!checkToken(OIS, OOS)) {
+                    System.out.println("invalid token");
+                    enterProgram.enter();
+                } else {
+                    String command = "showTimeline";
+                    OOS.writeObject(command);
+                    ArrayList<Tweet> timeline = (ArrayList<Tweet>) OIS.readObject();
+                    for (User following : user.getFollowings()) {
+                        for (Tweet tweet : following.getTweets()) {
+                            timeline.add(tweet);
+                        }
+                    }
+                    sortByDate(timeline);
+                    //show tweets
+                }
             } else if (choice.equals("2")) {
                 if(!checkToken(OIS,OOS)){
                     System.out.println("invalid token");

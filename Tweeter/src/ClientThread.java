@@ -217,6 +217,16 @@ public class ClientThread implements Runnable{
                 } catch (java.sql.SQLException e) {
                     e.printStackTrace();
                 }
+            } else if (choice.equals("showTimeLine")) {
+                try {
+                    showTimeline();
+                }catch (IOException e){
+                    System.err.println("eror");
+                }catch (ClassNotFoundException e){
+                    e.printStackTrace();
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -488,6 +498,10 @@ public class ClientThread implements Runnable{
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+    public void showTimeline() throws SQLException,IOException,ClassNotFoundException {
+        ArrayList<Tweet> tweets = database.getTweetFavstars();
+        OOS.writeObject(tweets);
     }
 }
 
