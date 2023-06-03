@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class User {
+public class User implements Serializable {
     private String username;
     private String firstName;
     private String lastName;

@@ -17,28 +17,34 @@ public class Database {
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS followInfo(followerUN VARCHAR(50),followingUN VARCHAR(50))");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS votes(voteID VARCHAR(100),retweetCount INT ,replyCount INT,likeCount INT,authorUsername VARCHAR(50),voteYear INT,voteMonth INT,voteDay INT,voteHour INT,voteMinute INT,text VARCHAR(280),option1 VARCHAR(100),option2 VARCHAR(100),option3 VARCHAR(100),option4 VARCHAR(100),option1Count INT,option2Count INT,option3Count INT,option4Count INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS retweets(retweetID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),retweetYear INT,retweetMonth INT,retweetDay INT,retweetHour INT,retweetMinute INT,referredTweetID VARCHAR(100),likeCount INT)");
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS quotes(quoteID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),quoteYear INT,quoteMonth INT,quoteDay INT,quoteHour INT,quoteMinute,referredTweetID VARCHAR(100),likeCount INT)");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS quotes(quoteID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),quoteYear INT,quoteMonth INT,quoteDay INT,quoteHour INT,quoteMinute INT,referredTweetID VARCHAR(100),likeCount INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS replies(replyID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),replyYear INT,replyMonth INT,replyDay INT,replyHour INT,replyMinute INT,referredTweetID VARCHAR(100),likeCount INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS directs(sender VARCHAR(50),receiver VARCHAR(50),text VARCHAR(300),directYear INT,directMonth INT,directDay INT,directHour INT,directMinute INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS blockInfo(blocker VARCHAR(50),blocked VARCHAR(50))");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS hashtagInfo(tweetID VARCHAR(100),hashtagName VARCHAR(30),hashtagYear INT,hashtagMonth INT,hashtagDay INT,hashtagHour INT,hashtagMinute INT)");
     }
     public void addUser(User user) throws SQLException {
-        PreparedStatement stm=conn.prepareStatement("INSERT INTO users (username,firstName,lastName,email,phoneNumber,password,country,avatar,header,bio,location,webAddress,birthYear,birthMonth,birthDay) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement stm=conn.prepareStatement("INSERT INTO users (username,firstName,lastName,email,phoneNumber,password,country,avatar,header,bio,location,webAddress,birthYear,birthMonth,birthDay,signUpYear ,signUpMonth ,signUpDay ,signUpHour ,signUpMinute) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         stm.setString(1,user.getUsername());
         stm.setString(2,user.getFirstName());
         stm.setString(3,user.getLastName());
-        stm.setString(4,user.getPhoneNumber());
-        stm.setString(5,user.getPassword());
-        stm.setString(6,user.getCountry());
-        stm.setBytes(7,user.getAvatar());
-        stm.setBytes(8,user.getHeader());
-        stm.setString(9,user.getBio());
-        stm.setString(10,user.getLocation());
-        stm.setString(11,user.getWebAddress());
-        stm.setInt(12,user.getBirthDate().getYear());
-        stm.setInt(13,user.getBirthDate().getMonthValue());
-        stm.setInt(14,user.getBirthDate().getDayOfMonth());
+        stm.setString(4,user.getEmail());
+        stm.setString(5,user.getPhoneNumber());
+        stm.setString(6,user.getPassword());
+        stm.setString(7,user.getCountry());
+        stm.setBytes(8,user.getAvatar());
+        stm.setBytes(9,user.getHeader());
+        stm.setString(10,user.getBio());
+        stm.setString(11,user.getLocation());
+        stm.setString(12,user.getWebAddress());
+        stm.setInt(13,user.getBirthDate().getYear());
+        stm.setInt(14,user.getBirthDate().getMonthValue());
+        stm.setInt(15,user.getBirthDate().getDayOfMonth());
+        stm.setInt(16,user.getSignUpDate().getYear());
+        stm.setInt(17,user.getSignUpDate().getMonthValue());
+        stm.setInt(18,user.getSignUpDate().getDayOfMonth());
+        stm.setInt(19,user.getSignUpDate().getHour());
+        stm.setInt(20,user.getSignUpDate().getMinute());
         stm.executeUpdate();
         stm.close();
     }
@@ -47,6 +53,7 @@ public class Database {
         PreparedStatement profileStm=conn.prepareStatement("SELECT * FROM users WHERE username=?");
         profileStm.setString(1,username);
         ResultSet rsProfile=profileStm.executeQuery();
+        rsProfile.next();
         User user=new User(username,rsProfile.getString("firstName"),rsProfile.getString("lastName"),rsProfile.getString("email"),rsProfile.getString("phoneNumber"),rsProfile.getString("password"),rsProfile.getString("country"),LocalDateTime.of(rsProfile.getInt("birthYear"),rsProfile.getInt("birthMonth"),rsProfile.getInt("birthDay"),0,0),LocalDateTime.of(rsProfile.getInt("signUpYear"),rsProfile.getInt("signUpMonth"),rsProfile.getInt("signUpDay"),0,0));
         user.setBio(rsProfile.getString("bio"));
         user.setLocation(rsProfile.getString("location"));
@@ -121,6 +128,7 @@ public class Database {
         PreparedStatement profileStm=conn.prepareStatement("SELECT * FROM users WHERE username=?");
         profileStm.setString(1,username);
         ResultSet rsProfile=profileStm.executeQuery();
+        rsProfile.next();
         User user=new User(username,rsProfile.getString("firstName"),rsProfile.getString("lastName"),null,null,null,null,null,null);
         user.setAvatar(rsProfile.getBytes("avatar"));
         profileStm.close();
@@ -131,6 +139,7 @@ public class Database {
         PreparedStatement profileStm=conn.prepareStatement("SELECT * FROM users WHERE username=?");
         profileStm.setString(1,username);
         ResultSet rsProfile=profileStm.executeQuery();
+        rsProfile.next();
         User user=new User(username,rsProfile.getString("firstName"),rsProfile.getString("lastName"),null,null,null,rsProfile.getString("country"),null,null);
         user.setAvatar(rsProfile.getBytes("avatar"));
         user.setHeader(rsProfile.getBytes("header"));

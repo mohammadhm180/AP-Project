@@ -7,7 +7,7 @@ import java.util.Date;
 class UserAuthenticator {
     private static final String SECRET_KEY = "jfaskjflsjfdsfdaljfksdfafdslaghjjfsafsaddsafdsagdsafjnghbslanndsafjkkjndfffdbkafnuhgflnlkfvjksfn"; // replace with your own secret key
 
-    private static final long EXPIRATION_TIME = 30000; // token expiration time in milliseconds (1 hour)
+    private static final long EXPIRATION_TIME = 60000*60*24; // token expiration time in milliseconds(1 day)
 
     // Method to generate a new JWT token given a user ID
     public static String generateToken(String userId) {
