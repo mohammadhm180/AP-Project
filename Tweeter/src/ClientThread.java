@@ -230,7 +230,7 @@ public class ClientThread implements Runnable{
         //checking email
         String emailCheckerRs=emailChecker(user.getEmail());
         if(!emailCheckerRs.equals("valid")){
-            OOS.writeObject(new  String(emailCheckerRs));
+            OOS.writeObject(new String(emailCheckerRs));
             return;
         }
         //checking phone number
@@ -470,3 +470,5 @@ public class ClientThread implements Runnable{
         }
     }
 }
+
+
