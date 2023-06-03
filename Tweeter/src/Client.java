@@ -565,6 +565,20 @@ class Menu {
                     }
                 }
             } else if (choice.equals("20")) {
+                String command = "like";
+                System.out.print("tweetID: ");
+                String tweetID = scanner.nextLine();
+                OOS.writeObject(command);
+                OOS.writeObject(tweetID);
+            } else if (choice.equals("21")) {
+                String command = "unlike";
+                System.out.print("tweetID: ");
+                String tweetID = scanner.nextLine();
+                OOS.writeObject(command);
+                OOS.writeObject(tweetID);
+            } else if (choice.equals("22")) {
+
+            } else if (choice.equals("23")) {
                 break;
             } else {
                 System.out.println("wrong input");
