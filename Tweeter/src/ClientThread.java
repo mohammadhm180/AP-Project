@@ -66,6 +66,17 @@ public class ClientThread implements Runnable{
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
+            } else if(choice.equals("checkSingInToken")){
+                try {
+                    String token=(String) OIS.readObject();
+                    checkSignInToken(token);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             } else if(choice.equals("block")){
                 try {
                     String blocker=(String) OIS.readObject();
@@ -274,6 +285,15 @@ public class ClientThread implements Runnable{
         OOS.writeObject(user);
     }
     public void checkToken(String token) throws IOException, SQLException {
+        String username=UserAuthenticator.validateToken(token);
+        if(username==null){
+            OOS.writeObject("invalid token");
+            return;
+        }
+        OOS.writeObject(new String("valid token"));
+    }
+    //this is called when we want to get a client back
+    public void checkSignInToken(String token) throws IOException, SQLException {
         String username=UserAuthenticator.validateToken(token);
         if(username==null){
             OOS.writeObject("invalid token");
