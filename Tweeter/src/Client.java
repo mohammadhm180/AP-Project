@@ -2,6 +2,7 @@ import io.jsonwebtoken.io.IOException;
 
 import java.io.*;
 import java.net.Socket;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -681,6 +682,17 @@ class Menu {
     public void setClient(User user) {
         this.user = user;
     }
+    public String showTweetTime(LocalDateTime tweetDate){
+        Duration duration = Duration.between(tweetDate, LocalDateTime.now());
+        long minutes = duration.toMinutes();
+        if(minutes<60){
+            return (minutes+"m");
+        }else if(minutes<60*24){
+            return ((minutes/60)+"h");
+        } else {
+            return (tweetDate.getDayOfMonth()+" "+tweetDate.getMonth().toString());
+        }
+    }
 
     public void showTweet(Tweet tweet) throws java.io.IOException, ClassNotFoundException {
         if (tweet instanceof Retweet) {
@@ -711,7 +723,7 @@ class Menu {
             //show result
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(quoteOwnerName + "  " + "@" + tweet.getAuthorUsername());
+            System.out.println(quoteOwnerName + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             //show referred tweet
             System.out.println("----------------------------------------------------------------------------------------");
@@ -732,7 +744,7 @@ class Menu {
             //show reply
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(replyOwnerName+"  @"+tweet.getAuthorUsername());
+            System.out.println(replyOwnerName+"  @"+tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println("replying to  @" + referredOwnerUsername);
             System.out.println(tweet.getText());
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
@@ -754,7 +766,7 @@ class Menu {
             String tweetOwnerName = (String) OIS.readObject();
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(tweetOwnerName + "  " + "@" + tweet.getAuthorUsername());
+            System.out.println(tweetOwnerName + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             System.out.println(((Vote) tweet).getOption1()+": "+option1percent);
             System.out.println(((Vote) tweet).getOption2()+": "+option2percent);
@@ -768,7 +780,7 @@ class Menu {
             String tweetOwnerName = (String) OIS.readObject();
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(tweetOwnerName + "  " + "@" + tweet.getAuthorUsername());
+            System.out.println(tweetOwnerName + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
             System.out.println();
