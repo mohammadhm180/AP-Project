@@ -194,6 +194,18 @@ public class ClientThread implements Runnable{
                 catch (SQLException e){
                     throw new RuntimeException(e);
                 }
+            }else if (choice.equals("setAvatar")) {
+                try {
+                    setAvatar();
+                } catch (java.sql.SQLException e) {
+                    e.printStackTrace();
+                }
+            } else if (choice.equals("setHeader")) {
+                try {
+                    setHeader();
+                } catch (java.sql.SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -422,4 +434,41 @@ public class ClientThread implements Runnable{
             throw new RuntimeException(e);
         }
     }
+    public void setAvatar() throws SQLException {
+        /*the avatar is set in frontend and the user object is passed to this method*/
+        try {
+            ObjectInputStream OIS = new ObjectInputStream(client.getInputStream());
+            User user = (User) OIS.readObject();
+            database.updateUser(user);
+            OIS.close();
+            String result = "avatar has been updated successfully";
+            ObjectOutputStream OOS = new ObjectOutputStream(client.getOutputStream());
+            OOS.writeObject(result);
+            OOS.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setHeader() throws SQLException {
+        /*the header is set in frontend and the user object is passed to this method*/
+        try {
+            ObjectInputStream OIS = new ObjectInputStream(client.getInputStream());
+            User user = (User) OIS.readObject();
+            database.updateUser(user);
+            OIS.close();
+            String result = "header has been updated successfully";
+            ObjectOutputStream OOS = new ObjectOutputStream(client.getOutputStream());
+            OOS.writeObject(result);
+            OOS.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+
+
