@@ -779,6 +779,9 @@ public class Database {
         addStatement.setString(3,message.getText());
         addStatement.setInt(4,message.getDate().getYear());
         addStatement.setInt(5,message.getDate().getDayOfMonth());
+        addStatement.setInt(6,message.getDate().getDayOfMonth());
+        addStatement.setInt(7,message.getDate().getHour());
+        addStatement.setInt(8,message.getDate().getMinute());
         addStatement.executeUpdate();
         addStatement.close();
     }
