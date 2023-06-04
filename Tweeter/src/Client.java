@@ -651,6 +651,16 @@ class Menu {
                 }
             } else if (choice.equals("n")) {
                 break;
+            }else if (choice.equals("27")) {
+                File file = new File("UserInfo/token.bin");
+                if(file.delete()){
+                    System.out.println("signed out successfully");
+                } else {
+                    System.out.println("failed to sign out");
+                }
+                String command = "signOut";
+                OOS.writeObject(command);
+                enterProgram.enter();
             } else {
                 System.out.println("wrong input");
             }

@@ -342,7 +342,7 @@ public class Database {
     }
 
     public void addVote(Vote vote) throws SQLException {
-        PreparedStatement stm=conn.prepareStatement("INSERT INTO votes (voteID,retweetCount,replyCount,likeCount,authorUsername,voteYear,voteMonth,voteDay,votrHour,voteMinute,text,option1,option2,option3,option4,option1Count,option2Count,option3Count,option4Count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement stm=conn.prepareStatement("INSERT INTO votes (voteID,retweetCount,replyCount,likeCount,authorUsername,voteYear,voteMonth,voteDay,voteHour,voteMinute,text,option1,option2,option3,option4,option1Count,option2Count,option3Count,option4Count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         stm.setString(1, UUID.randomUUID().toString());
         stm.setInt(2,vote.getRetweetCount());
         stm.setInt(3,vote.getReplyCount());
