@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class Quote extends Tweet{
+public class Quote extends Tweet implements Serializable {
     private String referredTweetID;
     private Tweet referredTweet;
 
@@ -14,8 +15,8 @@ public class Quote extends Tweet{
         this.referredTweetID = referredTweetID;
     }
 
-    public Quote(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, String referredTweetID, int retweetCount, int replyCount, int likeCount, Tweet referredTweet) {
-        super(text, photo, video, tweetDate, authorUsername, hashtag,retweetCount, replyCount, likeCount);
+    public Quote(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, String referredTweetID, int retweetCount, int replyCount, int likeCount, Tweet referredTweet,String quoteID) {
+        super(text, photo, video, tweetDate, authorUsername, hashtag,retweetCount, replyCount, likeCount,quoteID);
         this.referredTweetID = referredTweetID;
         this.referredTweet=referredTweet;
     }

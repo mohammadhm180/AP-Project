@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Tweet {
+public class Tweet implements Serializable {
     private String tweetID;
     private String text;
     private byte[] photo;
@@ -30,7 +31,7 @@ public class Tweet {
     }
 
 
-    public Tweet(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, int replyCount, int retweetCount, int likeCount) {
+    public Tweet(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, int replyCount, int retweetCount, int likeCount,String tweetID) {
         this.tweetID = UUID.randomUUID().toString();
         this.text = text;
         this.photo = photo;
@@ -42,6 +43,7 @@ public class Tweet {
         this.authorUsername = authorUsername;
         this.hashtag = hashtag;
         this.likeCount=likeCount;
+        this.tweetID=tweetID;
     }
 
 

@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Vote extends Tweet{
+public class Vote extends Tweet implements Serializable {
     private String option1;
     private String option2;
     private String option3;
@@ -26,8 +27,8 @@ public class Vote extends Tweet{
         this.option4Count = 0;
     }
 
-    public Vote(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, int replyCount, int retweetCount, int likeCount, String option1, String option2, String option3, String option4, int option1Count, int option2Count, int option3Count, int option4Count) {
-        super(text, photo, video, tweetDate, authorUsername, hashtag, replyCount, retweetCount, likeCount);
+    public Vote(String text, byte[] photo, byte[] video, LocalDateTime tweetDate, String authorUsername, ArrayList<String> hashtag, int replyCount, int retweetCount, int likeCount, String option1, String option2, String option3, String option4, int option1Count, int option2Count, int option3Count, int option4Count,String voteID) {
+        super(text, photo, video, tweetDate, authorUsername, hashtag, replyCount, retweetCount, likeCount,voteID);
         this.option1 = option1;
         this.option2 = option2;
         this.option3 = option3;

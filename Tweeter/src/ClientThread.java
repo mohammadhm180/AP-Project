@@ -66,7 +66,7 @@ public class ClientThread implements Runnable {
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
-            } else if (choice.equals("checkSingInToken")) {
+            } else if (choice.equals("checkSignInToken")) {
                 try {
                     String token = (String) OIS.readObject();
                     checkSignInToken(token);
@@ -278,6 +278,16 @@ public class ClientThread implements Runnable {
             } else if (choice.equals("vote")) {
                 try {
                     vote();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }else if (choice.equals("getDisplayInfo")) {
+                try {
+                    getDisplayInfo();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -568,7 +578,11 @@ public class ClientThread implements Runnable {
             throw new RuntimeException(e);
         }
     }
-
+    public void getDisplayInfo() throws IOException, ClassNotFoundException, SQLException {
+        String tweetID=(String) OIS.readObject();
+        DisplayInfo displayInfo=database.getDisplayInfo(tweetID);
+        OOS.writeObject(displayInfo);
+    }
     public void getReplies() throws IOException, ClassNotFoundException, SQLException {
         String tweetID = (String) OIS.readObject();
         ArrayList<Reply> replies = database.getReplies(tweetID);

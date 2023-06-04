@@ -71,7 +71,7 @@ class Menu {
         Scanner scanner = new Scanner(System.in);
         String choice;
         while (true) {
-            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-show replies\n21-like\n22-unlike\n23-add vote\n24-vote\n25-removeVote");
+            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-show replies\n21-like\n22-unlike\n23-add vote\n24-vote\n25-removeVote\n26-show me");
             choice = scanner.nextLine();
 
 
@@ -113,8 +113,11 @@ class Menu {
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(tweet);
-                        if ((OIS.readObject()).equals("tweeted successfully")) {
+                        String result=(String) OIS.readObject();
+                        if (result.equals("tweeted successfully")) {
                             user.getTweets().add(tweet);
+                        } else {
+                            System.out.println(result);
                         }
                     } catch (FileNotFoundException e) {
                         System.err.println("file not found");
@@ -223,11 +226,14 @@ class Menu {
                     OOS.writeObject(new String("getTweet"));
                     OOS.writeObject(tweetID);
                     Tweet tweet=(Tweet) OIS.readObject();
-                    Retweet retweet=new Retweet(tweet.getText(),tweet.getPhoto(),tweet.getVideo(),tweet.getTweetDate(),user.getUsername(),tweet.getHashtag(),tweet.getTweetID(),tweet.getRetweetCount(),tweet.getReplyCount(),tweet.getLikeCount());
+                    Retweet retweet=new Retweet(tweet.getText(),tweet.getPhoto(),tweet.getVideo(),tweet.getTweetDate(),user.getUsername(),tweet.getHashtag(),tweet.getTweetID(),tweet.getRetweetCount(),tweet.getReplyCount(),tweet.getLikeCount(),tweetID);
                     OOS.writeObject(new String("addTweet"));
                     OOS.writeObject(retweet);
-                    if ((OIS.readObject()).equals("tweeted successfully")) {
+                    String result=(String) OIS.readObject();
+                    if (result.equals("tweeted successfully")) {
                         user.getTweets().add(retweet);
+                    } else {
+                        System.out.println(result);
                     }
                 }
             } else if (choice.equals("9")) {
@@ -265,8 +271,11 @@ class Menu {
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(quote);
-                        if ((OIS.readObject()).equals("tweeted successfully")) {
+                        String result=(String) OIS.readObject();
+                        if (result.equals("tweeted successfully")) {
                             user.getTweets().add(quote);
+                        } else {
+                            System.out.println(result);
                         }
                     } catch (FileNotFoundException e) {
                         System.err.println("file not found");
@@ -311,8 +320,11 @@ class Menu {
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(reply);
-                        if ((OIS.readObject()).equals("tweeted successfully")) {
+                        String result=(String) OIS.readObject();
+                        if (result.equals("tweeted successfully")) {
                             user.getTweets().add(reply);
+                        } else {
+                            System.out.println(result);
                         }
                     } catch (FileNotFoundException e) {
                         System.err.println("file not found");
@@ -582,8 +594,11 @@ class Menu {
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(vote);
-                        if ((OIS.readObject()).equals("tweeted successfully")) {
+                        String result=(String) OIS.readObject();
+                        if (result.equals("tweeted successfully")) {
                             user.getTweets().add(vote);
+                        } else {
+                            System.out.println(result);
                         }
                     } catch (FileNotFoundException e) {
                         System.err.println("file not found");
@@ -630,6 +645,10 @@ class Menu {
                         e.printStackTrace();
                     }
                 }
+            }else if (choice.equals("26")) {
+                for (Tweet tweet: user.getTweets()){
+                    showTweet(tweet);
+                }
             } else if (choice.equals("n")) {
                 break;
             } else {
@@ -641,6 +660,7 @@ class Menu {
     public boolean checkToken(ObjectInputStream in, ObjectOutputStream out) {
         try {
             out.writeObject("checkToken");
+            OOS.writeObject(token);
             String result = (String) in.readObject();
             return result.equals("valid token");
         } catch (java.io.IOException e) {
@@ -701,50 +721,48 @@ class Menu {
             OOS.writeObject(new String(((Retweet) tweet).getReferredTweetID()));
             Tweet referredTweet = (Tweet) OIS.readObject();
             //getting retweet owner name
-            OOS.writeObject("getName");
-            OOS.writeObject(tweet.getAuthorUsername());
-            String name = (String) OIS.readObject();
-            System.out.println(name + " retweeted");
+            OOS.writeObject("getDisplayInfo");
+            OOS.writeObject(tweet.getTweetID());
+            DisplayInfo displayInfo = (DisplayInfo) OIS.readObject();
+            System.out.println(displayInfo.getUser().getFirstName()+" "+displayInfo.getUser().getLastName() + " retweeted");
             //showing referred tweet
             showTweet(referredTweet);
         } else if (tweet instanceof Quote) {
-            //getting referred tweet
-            OOS.writeObject(new String("getTweet"));
+            //getting referred tweet displayInfo
+            OOS.writeObject(new String("getDisplayInfo"));
             OOS.writeObject(new String(((Quote) tweet).getReferredTweetID()));
-            Tweet referredTweet = (Tweet) OIS.readObject();
-            //getting quote owner
-            OOS.writeObject("getName");
-            OOS.writeObject(tweet.getAuthorUsername());
-            String quoteOwnerName = (String) OIS.readObject();
-            //getting referred tweet owner names
-            OOS.writeObject("getName");
-            OOS.writeObject(referredTweet.getAuthorUsername());
-            String referredOwnerName = (String) OIS.readObject();
+            DisplayInfo referredTweetDisplayInfo = (DisplayInfo) OIS.readObject();
+            //getting quote owner DisplayInfo
+            OOS.writeObject("getDisplayInfo");
+            OOS.writeObject(tweet.getTweetID());
+            DisplayInfo quoteOwnerDisplayInfo = (DisplayInfo) OIS.readObject();
             //show result
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(quoteOwnerName + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(quoteOwnerDisplayInfo.getUser().getFirstName()+" "+quoteOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             //show referred tweet
             System.out.println("----------------------------------------------------------------------------------------");
-            System.out.println(referredTweet.getTweetID());
+            System.out.println(referredTweetDisplayInfo.getTweet().getTweetID());
             System.out.println();
-            System.out.println(referredOwnerName + "  " + "@" + referredTweet.getAuthorUsername());
-            System.out.println(tweet.getText());
+            System.out.println(referredTweetDisplayInfo.getUser().getFirstName()+" "+referredTweetDisplayInfo.getUser().getLastName() + "  " + "@" + referredTweetDisplayInfo.getTweet().getAuthorUsername());
+            System.out.println(referredTweetDisplayInfo.getTweet().getText());
             System.out.println("----------------------------------------------------------------------------------------");
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
             System.out.println();
         } else if (tweet instanceof Reply) {
-            OOS.writeObject("getName");
-            OOS.writeObject(tweet.getAuthorUsername());
-            String replyOwnerName = (String) OIS.readObject();
+            //getting reply displayInfo
+            OOS.writeObject(new String("getDisplayInfo"));
+            OOS.writeObject(new String(tweet.getTweetID()));
+            DisplayInfo replyDisplayInfo = (DisplayInfo) OIS.readObject();
+            //getting username of referred user
             OOS.writeObject("getWriterUsername");
             OOS.writeObject(new String(((Reply) tweet).getReferredTweetID()));
             String referredOwnerUsername = (String) OIS.readObject();
             //show reply
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(replyOwnerName+"  @"+tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(replyDisplayInfo.getUser().getFirstName()+" "+replyDisplayInfo.getUser().getLastName()+"  @"+tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println("replying to  @" + referredOwnerUsername);
             System.out.println(tweet.getText());
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
@@ -761,12 +779,12 @@ class Menu {
                  option3percent=((Vote) tweet).getOption3Count()/allVotesCount;
                  option4percent=((Vote) tweet).getOption4Count()/allVotesCount;
             }
-            OOS.writeObject("getName");
-            OOS.writeObject(tweet.getAuthorUsername());
-            String tweetOwnerName = (String) OIS.readObject();
+            OOS.writeObject("getDisplayInfo");
+            OOS.writeObject(tweet.getTweetID());
+            DisplayInfo tweetOwnerDisplayInfo = (DisplayInfo) OIS.readObject();
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(tweetOwnerName + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(tweetOwnerDisplayInfo.getUser().getFirstName()+" "+tweetOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             System.out.println(((Vote) tweet).getOption1()+": "+option1percent);
             System.out.println(((Vote) tweet).getOption2()+": "+option2percent);
@@ -775,12 +793,12 @@ class Menu {
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount()+" votes:"+allVotesCount);
             System.out.println();
         }else {
-            OOS.writeObject("getName");
-            OOS.writeObject(tweet.getAuthorUsername());
-            String tweetOwnerName = (String) OIS.readObject();
+            OOS.writeObject("getDisplayInfo");
+            OOS.writeObject(tweet.getTweetID());
+            DisplayInfo tweetOwnerDisplayInfo = (DisplayInfo) OIS.readObject();
             System.out.println(tweet.getTweetID());
             System.out.println();
-            System.out.println(tweetOwnerName + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(tweetOwnerDisplayInfo.getUser().getFirstName()+" "+tweetOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
             System.out.println();

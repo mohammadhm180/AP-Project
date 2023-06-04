@@ -18,7 +18,6 @@ public class User implements Serializable {
     private LocalDateTime signUpDate;
     private ArrayList<User> followers;
     private ArrayList<User> followings;
-    private ArrayList<Vote> votes;
     private ArrayList<Direct> directs;
     private byte[] avatar;
     private byte[] header;
@@ -39,7 +38,6 @@ public class User implements Serializable {
         this.signUpDate=signUpDate;
         followers=new ArrayList<>();
         followings=new ArrayList<>();
-        votes=new ArrayList<>();
         directs=new ArrayList<>();
         tweets=new ArrayList<>();
         blockedUsers=new ArrayList<>();
@@ -155,10 +153,6 @@ public class User implements Serializable {
 
     public ArrayList<Tweet> getTweets() {
         return tweets;
-    }
-
-    public ArrayList<Vote> getVotes() {
-        return votes;
     }
 
     public ArrayList<String> getBlockedUsers() {

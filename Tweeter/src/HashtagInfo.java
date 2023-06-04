@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class HashtagInfo {
+public class HashtagInfo implements Serializable {
     String hashtag;
     int count;
     LocalDateTime date;

@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -86,10 +87,9 @@ public class Database {
         followingInfoStm.close();
         followerInfoStm.close();
         //filling votes
-        ArrayList<Vote> votes=user.getVotes();
-        setVotesOfUser(user.getUsername(),votes);
-        //filling tweets of user
         ArrayList<Tweet> tweets=user.getTweets();
+        setVotesOfUser(user.getUsername(),tweets);
+        //filling tweets of user
         setTweetsOfUser(username,tweets);
         //filling retweets of user
         setRetweetsOfUser(username,tweets);
@@ -166,10 +166,9 @@ public class Database {
         followerInfoStm.close();
         followingInfoStm.close();
         //filling votes
-        ArrayList<Vote> votes=user.getVotes();
-        setVotesOfUser(user.getUsername(),votes);
-        //filling tweets of user
         ArrayList<Tweet> tweets=user.getTweets();
+        setVotesOfUser(user.getUsername(),tweets);
+        //filling tweets of user
         setTweetsOfUser(username,tweets);
         //filling retweets of user
         setRetweetsOfUser(username,tweets);
@@ -182,7 +181,7 @@ public class Database {
         stm.setString(1,tweetID);
         ResultSet tweetRs=stm.executeQuery();
         tweetRs.next();
-        Tweet tweet=new Tweet(tweetRs.getString("text"),tweetRs.getBytes("photo"),tweetRs.getBytes("video"),LocalDateTime.of(tweetRs.getInt("year"),tweetRs.getInt("month"),tweetRs.getInt("day"),tweetRs.getInt("hour"),tweetRs.getInt("minute")),tweetRs.getString("authorUsername"),getHashtagsOfTweet(tweetID),tweetRs.getInt("replyCount"),tweetRs.getInt("retweetCount"),tweetRs.getInt("likeCount"));
+        Tweet tweet=new Tweet(tweetRs.getString("text"),tweetRs.getBytes("photo"),tweetRs.getBytes("video"),LocalDateTime.of(tweetRs.getInt("tweetYear"),tweetRs.getInt("tweetMonth"),tweetRs.getInt("tweetDay"),tweetRs.getInt("tweetHour"),tweetRs.getInt("tweetMinute")),tweetRs.getString("authorUsername"),getHashtagsOfTweet(tweetID),tweetRs.getInt("replyCount"),tweetRs.getInt("retweetCount"),tweetRs.getInt("likeCount"),tweetRs.getString("tweetID"));
         stm.close();
         return tweet;
     }
@@ -191,7 +190,7 @@ public class Database {
         voteStm.setString(1,voteID);
         ResultSet voteRs=voteStm.executeQuery();
         voteRs.next();
-        Vote vote=new Vote(voteRs.getString("text"),null,null,LocalDateTime.of(voteRs.getInt("year"),voteRs.getInt("month"),voteRs.getInt("day"),voteRs.getInt("hour"),voteRs.getInt("minute")),voteRs.getString("authorUsername"),getHashtagsOfTweet(voteRs.getString("voteID")),voteRs.getInt("replyCount"),voteRs.getInt("retweetCount"),voteRs.getInt("likeCount"),voteRs.getString("option1"),voteRs.getString("option2"),voteRs.getString("option3"),voteRs.getString("option4"),voteRs.getInt("option1Count"),voteRs.getInt("option2Count"),voteRs.getInt("option3Count"),voteRs.getInt("option4Count"));
+        Vote vote=new Vote(voteRs.getString("text"),null,null,LocalDateTime.of(voteRs.getInt("voteYear"),voteRs.getInt("voteMonth"),voteRs.getInt("voteDay"),voteRs.getInt("voteHour"),voteRs.getInt("voteMinute")),voteRs.getString("authorUsername"),getHashtagsOfTweet(voteRs.getString("voteID")),voteRs.getInt("replyCount"),voteRs.getInt("retweetCount"),voteRs.getInt("likeCount"),voteRs.getString("option1"),voteRs.getString("option2"),voteRs.getString("option3"),voteRs.getString("option4"),voteRs.getInt("option1Count"),voteRs.getInt("option2Count"),voteRs.getInt("option3Count"),voteRs.getInt("option4Count"),voteRs.getString("voteID"));
         voteStm.close();
         return vote;
     }
@@ -200,7 +199,7 @@ public class Database {
         stm.setString(1,retweetID);
         ResultSet retweetRs=stm.executeQuery();
         retweetRs.next();
-        Retweet retweet= new Retweet(retweetRs.getString("text"),retweetRs.getBytes("photo"),retweetRs.getBytes("video"),LocalDateTime.of(retweetRs.getInt("year"),retweetRs.getInt("month"),retweetRs.getInt("day"),retweetRs.getInt("hour"),retweetRs.getInt("minute")),retweetRs.getString("authorUsername"),getHashtagsOfTweet(retweetID),retweetRs.getString("referredTweetID"),retweetRs.getInt("replyCount"),retweetRs.getInt("retweetCount"),retweetRs.getInt("likeCount"));
+        Retweet retweet= new Retweet(retweetRs.getString("text"),retweetRs.getBytes("photo"),retweetRs.getBytes("video"),LocalDateTime.of(retweetRs.getInt("retweetYear"),retweetRs.getInt("retweetMonth"),retweetRs.getInt("retweetDay"),retweetRs.getInt("retweetHour"),retweetRs.getInt("retweetMinute")),retweetRs.getString("authorUsername"),getHashtagsOfTweet(retweetID),retweetRs.getString("referredTweetID"),retweetRs.getInt("replyCount"),retweetRs.getInt("retweetCount"),retweetRs.getInt("likeCount"), retweetRs.getString("retweetID"));
         stm.close();
         return retweet;
     }
@@ -211,14 +210,14 @@ public class Database {
         quoteRs.next();
         Quote quote=null;
         try{
-             quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("year"),quoteRs.getInt("month"),quoteRs.getInt("day"),quoteRs.getInt("hour"),quoteRs.getInt("minute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getTweet(quoteRs.getString("referredTweetID")));
+             quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("quoteYear"),quoteRs.getInt("quoteMonth"),quoteRs.getInt("quoteDay"),quoteRs.getInt("quoteHour"),quoteRs.getInt("quoteMinute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getTweet(quoteRs.getString("referredTweetID")),quoteRs.getString("quoteID"));
         }
         catch (SQLException e){
             //ignore
         }
         if(quote==null){
             try{
-                quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("year"),quoteRs.getInt("month"),quoteRs.getInt("day"),quoteRs.getInt("hour"),quoteRs.getInt("minute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getQuote(quoteRs.getString("referredTweetID")));
+                quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("quoteYear"),quoteRs.getInt("quoteMonth"),quoteRs.getInt("quoteDay"),quoteRs.getInt("quoteHour"),quoteRs.getInt("quoteMinute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getQuote(quoteRs.getString("referredTweetID")),quoteRs.getString("quoteID"));
             }
             catch (SQLException e){
                 //ignore
@@ -226,14 +225,14 @@ public class Database {
         }
         if(quote==null){
             try {
-                quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("year"),quoteRs.getInt("month"),quoteRs.getInt("day"),quoteRs.getInt("hour"),quoteRs.getInt("minute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getReply(quoteRs.getString("referredTweetID")));
+                quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("quoteYear"),quoteRs.getInt("quoteMonth"),quoteRs.getInt("quoteDay"),quoteRs.getInt("quoteHour"),quoteRs.getInt("quoteMinute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getReply(quoteRs.getString("referredTweetID")),quoteRs.getString("quoteID"));
             } catch (SQLException e){
                 //ignore
             }
         }
         if(quote==null){
             try {
-                quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("year"),quoteRs.getInt("month"),quoteRs.getInt("day"),quoteRs.getInt("hour"),quoteRs.getInt("minute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getVote(quoteRs.getString("referredTweetID")));
+                quote=new Quote(quoteRs.getString("text"),quoteRs.getBytes("photo"),quoteRs.getBytes("video"),LocalDateTime.of(quoteRs.getInt("quoteYear"),quoteRs.getInt("quoteMonth"),quoteRs.getInt("quoteDay"),quoteRs.getInt("quoteHour"),quoteRs.getInt("quoteMinute")),quoteRs.getString("authorUsername"),getHashtagsOfTweet(quoteID),quoteRs.getString("referredTweetID"),quoteRs.getInt("replyCount"),quoteRs.getInt("retweetCount"),quoteRs.getInt("likeCount"),getVote(quoteRs.getString("referredTweetID")),quoteRs.getString("quoteID"));
             } catch (SQLException e){
                 throw new SQLException();
             }
@@ -247,7 +246,7 @@ public class Database {
         stm.setString(1,tweetID);
         ResultSet replyRs=stm.executeQuery();
         while (replyRs.next()){
-            replies.add(new Reply(replyRs.getString("text"),replyRs.getBytes("photo"),replyRs.getBytes("video"),LocalDateTime.of(replyRs.getInt("year"),replyRs.getInt("month"),replyRs.getInt("day"),replyRs.getInt("hour"),replyRs.getInt("minute")),replyRs.getString("authorUsername"),getHashtagsOfTweet(replyRs.getString("replyID")),replyRs.getString("referredTweetID"),replyRs.getInt("replyCount"),replyRs.getInt("retweetCount"),replyRs.getInt("likeCount")));
+            replies.add(new Reply(replyRs.getString("text"),replyRs.getBytes("photo"),replyRs.getBytes("video"),LocalDateTime.of(replyRs.getInt("year"),replyRs.getInt("month"),replyRs.getInt("day"),replyRs.getInt("hour"),replyRs.getInt("minute")),replyRs.getString("authorUsername"),getHashtagsOfTweet(replyRs.getString("replyID")),replyRs.getString("referredTweetID"),replyRs.getInt("replyCount"),replyRs.getInt("retweetCount"),replyRs.getInt("likeCount"),replyRs.getString("replyID")));
         }
         stm.close();
         return replies;
@@ -257,7 +256,7 @@ public class Database {
         stm.setString(1,replyID);
         ResultSet replyRs=stm.executeQuery();
         replyRs.next();
-        Reply reply=new Reply(replyRs.getString("text"),replyRs.getBytes("photo"),replyRs.getBytes("video"),LocalDateTime.of(replyRs.getInt("year"),replyRs.getInt("month"),replyRs.getInt("day"),replyRs.getInt("hour"),replyRs.getInt("minute")),replyRs.getString("authorUsername"),getHashtagsOfTweet(replyRs.getString("replyID")),replyRs.getString("referredTweetID"),replyRs.getInt("replyCount"),replyRs.getInt("retweetCount"),replyRs.getInt("likeCount"));
+        Reply reply=new Reply(replyRs.getString("text"),replyRs.getBytes("photo"),replyRs.getBytes("video"),LocalDateTime.of(replyRs.getInt("replyYear"),replyRs.getInt("replyMonth"),replyRs.getInt("replyDay"),replyRs.getInt("replyHour"),replyRs.getInt("replyMinute")),replyRs.getString("authorUsername"),getHashtagsOfTweet(replyRs.getString("replyID")),replyRs.getString("referredTweetID"),replyRs.getInt("replyCount"),replyRs.getInt("retweetCount"),replyRs.getInt("likeCount"),replyRs.getString("replyID"));
         stm.close();
         return reply;
     }
@@ -288,12 +287,12 @@ public class Database {
         }
         tweetStm.close();
     }
-    public void setVotesOfUser(String authorUsername,ArrayList<Vote> votes) throws SQLException {
+    public void setVotesOfUser(String authorUsername,ArrayList<Tweet> tweets) throws SQLException {
         PreparedStatement voteStm=conn.prepareStatement("SELECT * FROM votes WHERE authorUsername=?");
         voteStm.setString(1,authorUsername);
         ResultSet voteRs=voteStm.executeQuery();
         while (voteRs.next()){
-            votes.add(getVote(voteRs.getString("voteID")));
+            tweets.add(getVote(voteRs.getString("voteID")));
         }
         voteStm.close();
     }
@@ -393,7 +392,7 @@ public class Database {
         }
     }
     public void addTweet(Tweet tweet) throws SQLException {
-        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO tweets(tweetID,text,photo,video,retweetCount,replyCount,authorUsername,hashtag,tweetYear,tweetMonth,tweetDay) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO tweets(tweetID,text,photo,video,retweetCount,replyCount,authorUsername,tweetYear,tweetMonth,tweetDay,tweetHour,tweetMinute,likeCount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
         addStatement.setString(1, tweet.getTweetID());
         addStatement.setString(2, tweet.getText());
         addStatement.setBytes(3, tweet.getPhoto());
@@ -406,6 +405,7 @@ public class Database {
         addStatement.setInt(10, tweet.getTweetDate().getDayOfMonth());
         addStatement.setInt(11,tweet.getTweetDate().getHour());
         addStatement.setInt(12,tweet.getTweetDate().getMinute());
+        addStatement.setInt(13,tweet.getLikeCount());
         addStatement.executeUpdate();
         addStatement.close();
     }
@@ -467,7 +467,7 @@ public class Database {
             //ignore
         }
         //adding retweet
-        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO retweets(retweetID,text,photo,video,retweetCount,replyCount,authorUsername,hashtag,retweetYear,retweetMonth,retweetDay,referredTweetID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO retweets(retweetID,text,photo,video,retweetCount,replyCount,authorUsername,retweetYear,retweetMonth,retweetDay,referredTweetID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
         addStatement.setString(1, retweet.getTweetID());
         addStatement.setString(2, retweet.getText());
         addStatement.setBytes(3, retweet.getPhoto());
@@ -566,7 +566,7 @@ public class Database {
         } catch (SQLException e) {
             //ignore
         }
-        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO quotes(quoteID,text,photo,video,retweetCount,replyCount,authorUsername,hashtag,quoteYear,quoteMonth,quoteDay) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO quotes(quoteID,text,photo,video,retweetCount,replyCount,authorUsername,quoteYear,quoteMonth,quoteDay,quoteHour,quoteMinute,referredTweetID,likeCount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         addStatement.setString(1, quote.getTweetID());
         addStatement.setString(2, quote.getText());
         addStatement.setBytes(3, quote.getPhoto());
@@ -580,6 +580,7 @@ public class Database {
         addStatement.setInt(11, quote.getTweetDate().getHour());
         addStatement.setInt(12, quote.getTweetDate().getMinute());
         addStatement.setString(13, quote.getReferredTweetID());
+        addStatement.setInt(14,quote.getLikeCount());
         addStatement.executeUpdate();
         addStatement.close();
         //increase retweetCount in ReferredTweetID
@@ -676,7 +677,7 @@ public class Database {
     }
 
     public void addReply(Reply reply) throws SQLException {
-        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO replies(replyID,text,photo,video,retweetCount,replyCount,authorUsername,hashtag,replyYear,replyMonth,replyDay,replyHour,replyMinute,referredTweetID,likeCount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO replies(replyID,text,photo,video,retweetCount,replyCount,authorUsername,replyYear,replyMonth,replyDay,replyHour,replyMinute,referredTweetID,likeCount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         addStatement.setString(1, reply.getTweetID());
         addStatement.setString(2, reply.getText());
         addStatement.setBytes(3, reply.getPhoto());
@@ -918,5 +919,48 @@ public class Database {
         }
         rs.close();
         return result;
+    }
+    public DisplayInfo getDisplayInfo(String tweetID) {
+        try {
+            Tweet tweet =getTweet(tweetID);
+            User user=incompleteUserFetch(tweet.getAuthorUsername());
+            DisplayInfo displayInfo=new DisplayInfo(user,tweet);
+             return displayInfo;
+        } catch (SQLException e) {
+            //ignore
+        }
+        try {
+            Quote quote =getQuote(tweetID);
+            User user=incompleteUserFetch(quote.getAuthorUsername());
+            DisplayInfo displayInfo=new DisplayInfo(user,quote);
+            return displayInfo;
+        } catch (SQLException e) {
+            //ignore
+        }
+        try {
+            Reply reply = getReply(tweetID);
+            User user=incompleteUserFetch(reply.getAuthorUsername());
+            DisplayInfo displayInfo=new DisplayInfo(user,reply);
+            return displayInfo;
+        } catch (SQLException e) {
+            //ignore
+        }
+        try {
+            Vote vote = getVote(tweetID);
+            User user=incompleteUserFetch(vote.getAuthorUsername());
+            DisplayInfo displayInfo=new DisplayInfo(user,vote);
+            return displayInfo;
+        } catch (SQLException e) {
+            //ignore
+        }
+        try {
+            Retweet retweet = getRetweet(tweetID);
+            User user=incompleteUserFetch(retweet.getAuthorUsername());
+            DisplayInfo displayInfo=new DisplayInfo(user,retweet);
+            return displayInfo;
+        } catch (SQLException e) {
+            //ignore
+        }
+        return null;
     }
 }

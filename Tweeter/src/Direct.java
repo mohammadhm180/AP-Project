@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Direct {
+public class Direct implements Serializable {
     private String username;
     private ArrayList<Message> sentMessages;
     private ArrayList<Message> receivedMessages;

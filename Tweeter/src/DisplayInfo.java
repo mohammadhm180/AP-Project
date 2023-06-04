@@ -1,4 +1,6 @@
-public class DisplayInfo {
+import java.io.Serializable;
+
+public class DisplayInfo implements Serializable {
     User user;
     Tweet tweet;
 
