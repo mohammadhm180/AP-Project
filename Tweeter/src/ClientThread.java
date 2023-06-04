@@ -743,14 +743,10 @@ public class ClientThread implements Runnable {
     public void setAvatar() throws SQLException {
         /*the avatar is set in frontend and the user object is passed to this method*/
         try {
-            ObjectInputStream OIS = new ObjectInputStream(client.getInputStream());
             User user = (User) OIS.readObject();
             database.updateUser(user);
-            OIS.close();
             String result = "avatar has been updated successfully";
-            ObjectOutputStream OOS = new ObjectOutputStream(client.getOutputStream());
             OOS.writeObject(result);
-            OOS.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
@@ -761,14 +757,10 @@ public class ClientThread implements Runnable {
     public void setHeader() throws SQLException {
         /*the header is set in frontend and the user object is passed to this method*/
         try {
-            ObjectInputStream OIS = new ObjectInputStream(client.getInputStream());
             User user = (User) OIS.readObject();
             database.updateUser(user);
-            OIS.close();
             String result = "header has been updated successfully";
-            ObjectOutputStream OOS = new ObjectOutputStream(client.getOutputStream());
             OOS.writeObject(result);
-            OOS.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {

@@ -1,6 +1,4 @@
-import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -246,7 +244,7 @@ public class Database {
         stm.setString(1,tweetID);
         ResultSet replyRs=stm.executeQuery();
         while (replyRs.next()){
-            replies.add(new Reply(replyRs.getString("text"),replyRs.getBytes("photo"),replyRs.getBytes("video"),LocalDateTime.of(replyRs.getInt("year"),replyRs.getInt("month"),replyRs.getInt("day"),replyRs.getInt("hour"),replyRs.getInt("minute")),replyRs.getString("authorUsername"),getHashtagsOfTweet(replyRs.getString("replyID")),replyRs.getString("referredTweetID"),replyRs.getInt("replyCount"),replyRs.getInt("retweetCount"),replyRs.getInt("likeCount"),replyRs.getString("replyID")));
+            replies.add(new Reply(replyRs.getString("text"),replyRs.getBytes("photo"),replyRs.getBytes("video"),LocalDateTime.of(replyRs.getInt("replyYear"),replyRs.getInt("replyMonth"),replyRs.getInt("replyDay"),replyRs.getInt("replyHour"),replyRs.getInt("replyMinute")),replyRs.getString("authorUsername"),getHashtagsOfTweet(replyRs.getString("replyID")),replyRs.getString("referredTweetID"),replyRs.getInt("replyCount"),replyRs.getInt("retweetCount"),replyRs.getInt("likeCount"),replyRs.getString("replyID")));
         }
         stm.close();
         return replies;
@@ -308,33 +306,35 @@ public class Database {
         return hashtags;
     }
     public void updateUser(User user) throws SQLException {
-        PreparedStatement stm=conn.prepareStatement("UPDATE users SET username=? ,firstName=? ,lastName=? , email=?,phoneNumber=? ,password=? , country=? , avatar=? , header=? ,bio=? ,location=? ,webAddress=? ,birthYear=? ,birthMonth=? ,birthDay=? ,  WHERE username=?  ");
+        PreparedStatement stm=conn.prepareStatement("UPDATE users SET username=? ,firstName=? ,lastName=? , email=?,phoneNumber=? ,password=? , country=? , avatar=? , header=? ,bio=? ,location=? ,webAddress=? ,birthYear=? ,birthMonth=? ,birthDay=?  WHERE username=?  ");
         stm.setString(1,user.getUsername());
         stm.setString(2,user.getFirstName());
         stm.setString(3,user.getLastName());
-        stm.setString(4,user.getPhoneNumber());
-        stm.setString(5,user.getPassword());
-        stm.setString(6,user.getCountry());
-        stm.setBytes(7,user.getAvatar());
-        stm.setBytes(8,user.getHeader());
-        stm.setString(9,user.getBio());
-        stm.setString(10,user.getLocation());
-        stm.setString(11,user.getWebAddress());
-        stm.setInt(12,user.getBirthDate().getYear());
-        stm.setInt(13,user.getBirthDate().getMonthValue());
-        stm.setInt(14,user.getBirthDate().getDayOfMonth());
+        stm.setString(4,user.getEmail());
+        stm.setString(5,user.getPhoneNumber());
+        stm.setString(6,user.getPassword());
+        stm.setString(7,user.getCountry());
+        stm.setBytes(8,user.getAvatar());
+        stm.setBytes(9,user.getHeader());
+        stm.setString(10,user.getBio());
+        stm.setString(11,user.getLocation());
+        stm.setString(12,user.getWebAddress());
+        stm.setInt(13,user.getBirthDate().getYear());
+        stm.setInt(14,user.getBirthDate().getMonthValue());
+        stm.setInt(15,user.getBirthDate().getDayOfMonth());
+        stm.setString(16,user.getUsername());
         stm.executeUpdate();
         stm.close();
     }
     public void addFollowInfo(String followerUN, String followingUN) throws SQLException {
-        PreparedStatement stm= conn.prepareStatement("INSERT INTO followInfo (followrUN,followingUN) VALUES (?,?)");
+        PreparedStatement stm= conn.prepareStatement("INSERT INTO followInfo (followerUN,followingUN) VALUES (?,?)");
         stm.setString(1,followerUN);
         stm.setString(2,followingUN);
         stm.executeUpdate();
         stm.close();
     }
     public void removeFollowInfo(String followerUN, String followingUN) throws SQLException {
-        PreparedStatement stm=conn.prepareStatement("DELETE FROM followInfo WHERE followrUN=? AND followingUN=?");
+        PreparedStatement stm=conn.prepareStatement("DELETE FROM followInfo WHERE followerUN=? AND followingUN=?");
         stm.setString(1,followerUN);
         stm.setString(2,followingUN);
         stm.executeUpdate();
@@ -342,7 +342,7 @@ public class Database {
     }
 
     public void addVote(Vote vote) throws SQLException {
-        PreparedStatement stm=conn.prepareStatement("INSERT INTO votes (voteID,retweetCount,replyCount,likeCount,authorUsername,voteYear,voteMonth,voteDay,votrHour,voteMinute,text,option1,option2,option3,option4,option1Count,option2Count,option3Count,option4Count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement stm=conn.prepareStatement("INSERT INTO votes (voteID,retweetCount,replyCount,likeCount,authorUsername,voteYear,voteMonth,voteDay,voteHour,voteMinute,text,option1,option2,option3,option4,option1Count,option2Count,option3Count,option4Count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         stm.setString(1, UUID.randomUUID().toString());
         stm.setInt(2,vote.getRetweetCount());
         stm.setInt(3,vote.getReplyCount());
@@ -467,7 +467,7 @@ public class Database {
             //ignore
         }
         //adding retweet
-        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO retweets(retweetID,text,photo,video,retweetCount,replyCount,authorUsername,retweetYear,retweetMonth,retweetDay,referredTweetID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO retweets(retweetID,text,photo,video,retweetCount,replyCount,authorUsername,retweetYear,retweetMonth,retweetDay,retweetHour,retweetMinute,referredTweetID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
         addStatement.setString(1, retweet.getTweetID());
         addStatement.setString(2, retweet.getText());
         addStatement.setBytes(3, retweet.getPhoto());
@@ -503,7 +503,7 @@ public class Database {
             // Ignore exception if retweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount + 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount + 1 WHERE replyID = ?");
             tweetStmt.setString(1, retweet.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -512,7 +512,7 @@ public class Database {
             // Ignore exception if retweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET retweetCount = retweetCount + 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET retweetCount = retweetCount + 1 WHERE voteID = ?");
             tweetStmt.setString(1, retweet.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -548,6 +548,14 @@ public class Database {
         }
         try {
             PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET retweetCount = retweetCount - 1 WHERE voteID = ?");
+            tweetStmt.setString(1,retweet.getReferredTweetID());
+            tweetStmt.executeUpdate();
+            tweetStmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount - 1 WHERE replyID = ?");
             tweetStmt.setString(1,retweet.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -593,14 +601,6 @@ public class Database {
             // Ignore exception if tweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE retweets SET retweetCount = retweetCount + 1 WHERE retweetID = ?");
-            tweetStmt.setString(1, quote.getReferredTweetID());
-            tweetStmt.executeUpdate();
-            tweetStmt.close();
-        } catch (SQLException e) {
-            // Ignore exception if retweetID not found in tweet table
-        }
-        try {
             PreparedStatement tweetStmt = conn.prepareStatement("UPDATE quotes SET retweetCount = retweetCount + 1 WHERE quoteID = ?");
             tweetStmt.setString(1, quote.getReferredTweetID());
             tweetStmt.executeUpdate();
@@ -609,7 +609,7 @@ public class Database {
             //Ignore exception if retweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount + 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount + 1 WHERE replyID = ?");
             tweetStmt.setString(1, quote.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -617,7 +617,7 @@ public class Database {
             //ignore
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET retweetCount = retweetCount + 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET retweetCount = retweetCount + 1 WHERE voteID = ?");
             tweetStmt.setString(1, quote.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -640,7 +640,7 @@ public class Database {
         deleteStatement.executeUpdate();
 
         //removing all replies of the quote
-        deleteStatement = conn.prepareStatement("DELETE FROM reply WHERE referredTweetID = ?");
+        deleteStatement = conn.prepareStatement("DELETE FROM replies WHERE referredTweetID = ?");
         deleteStatement.setString(1, quoteID);
         deleteStatement.executeUpdate();
 
@@ -667,6 +667,14 @@ public class Database {
             e.printStackTrace();
         }
         try {
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount - 1 WHERE replyID = ?");
+            tweetStmt.setString(1, quote.getReferredTweetID());
+            tweetStmt.executeUpdate();
+            tweetStmt.close();
+        } catch (SQLException e) {
+            //ignore
+        }
+        try {
             PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET retweetCount = retweetCount - 1 WHERE voteID = ?");
             tweetStmt.setString(1,quote.getReferredTweetID());
             tweetStmt.executeUpdate();
@@ -677,7 +685,7 @@ public class Database {
     }
 
     public void addReply(Reply reply) throws SQLException {
-        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO replies(replyID,text,photo,video,retweetCount,replyCount,authorUsername,replyYear,replyMonth,replyDay,replyHour,replyMinute,referredTweetID,likeCount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO replies(replyID,text,photo,video,retweetCount,replyCount,authorUsername,replyYear,replyMonth,replyDay,replyHour,replyMinute,referredTweetID,likeCount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         addStatement.setString(1, reply.getTweetID());
         addStatement.setString(2, reply.getText());
         addStatement.setBytes(3, reply.getPhoto());
@@ -699,7 +707,7 @@ public class Database {
         }
         //increase retweetCount in ReferredTweetID
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE tweets SET retweetCount = retweetCount + 1 WHERE tweetID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE tweets SET replyCount = replyCount + 1 WHERE tweetID = ?");
             tweetStmt.setString(1, reply.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -707,15 +715,7 @@ public class Database {
             // Ignore exception if tweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE retweets SET retweetCount = retweetCount + 1 WHERE retweetID = ?");
-            tweetStmt.setString(1, reply.getReferredTweetID());
-            tweetStmt.executeUpdate();
-            tweetStmt.close();
-        } catch (SQLException e) {
-            // Ignore exception if retweetID not found in tweet table
-        }
-        try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE quotes SET retweetCount = retweetCount + 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE quotes SET replyCount = replyCount + 1 WHERE quoteID = ?");
             tweetStmt.setString(1, reply.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -723,12 +723,20 @@ public class Database {
             //Ignore exception if retweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount + 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET replyCount = replyCount + 1 WHERE replyID = ?");
             tweetStmt.setString(1, reply.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        try {
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET replyCount = replyCount + 1 WHERE voteID = ?");
+            tweetStmt.setString(1, reply.getReferredTweetID());
+            tweetStmt.executeUpdate();
+            tweetStmt.close();
+        } catch (SQLException e) {
+            //
         }
     }
 
@@ -755,7 +763,7 @@ public class Database {
         deleteStatement.close();
         //decrease retweetCount in ReferredTweetID
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE tweets SET retweetCount = retweetCount - 1 WHERE tweetID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE tweets SET replyCount = replyCount - 1 WHERE tweetID = ?");
             tweetStmt.setString(1, reply.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -763,7 +771,7 @@ public class Database {
             // Ignore exception if tweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE retweets SET retweetCount = retweetCount - 1 WHERE retweetID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE quotes SET replyCount = replyCount - 1 WHERE quoteID = ?");
             tweetStmt.setString(1, reply.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -771,15 +779,7 @@ public class Database {
             // Ignore exception if retweetID not found in tweet table
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE quotes SET retweetCount = retweetCount - 1 WHERE quoteID = ?");
-            tweetStmt.setString(1, reply.getReferredTweetID());
-            tweetStmt.executeUpdate();
-            tweetStmt.close();
-        } catch (SQLException e) {
-            // Ignore exception if retweetID not found in tweet table
-        }
-        try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET retweetCount = retweetCount - 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE replies SET replyCount = replyCount - 1 WHERE replyID = ?");
             tweetStmt.setString(1, reply.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -787,7 +787,7 @@ public class Database {
             //
         }
         try {
-            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET retweetCount = retweetCount - 1 WHERE quoteID = ?");
+            PreparedStatement tweetStmt = conn.prepareStatement("UPDATE votes SET replyCount = replyCount - 1 WHERE voteID = ?");
             tweetStmt.setString(1, reply.getReferredTweetID());
             tweetStmt.executeUpdate();
             tweetStmt.close();
@@ -811,10 +811,21 @@ public class Database {
     }
     public void block(String blocker,String blocked) throws SQLException{
         PreparedStatement addStatement = conn.prepareStatement("INSERT INTO blockInfo(blocker,blocked)VALUES (?,?)");
-        addStatement.setString(1,blocker);
-        addStatement.setString(2,blocked);
+        PreparedStatement updateFollowInfo = conn.prepareStatement("DELETE FROM followInfo WHERE followerUN=? AND followingUN=?");
+        updateFollowInfo.setString(1,blocker);
+        updateFollowInfo.setString(2,blocked);
+        updateFollowInfo.executeUpdate();
+
+        updateFollowInfo.setString(1,blocked);
+        updateFollowInfo.setString(2,blocker);
+        updateFollowInfo.executeUpdate();
+
+        addStatement.setString(1, blocker);
+        addStatement.setString(2, blocked);
         addStatement.executeUpdate();
+
         addStatement.close();
+        updateFollowInfo.close();
     }
 
     public void unBlock(String blocker,String blocked) throws SQLException{

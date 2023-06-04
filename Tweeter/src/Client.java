@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/**/
 public class Client {
     public static void main(String[] args) throws java.io.IOException, ClassNotFoundException {
         Socket server = null;
@@ -71,15 +70,30 @@ class Menu {
         Scanner scanner = new Scanner(System.in);
         String choice;
         while (true) {
-            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-show replies\n21-like\n22-unlike\n23-add vote\n24-vote\n25-removeVote\n26-show me");
+            System.out.println("1-show timeline\n2-tweet\n3-set avatar\n4-set header\n5-set bio\n6-show followers\n7-show followings\n8-retweet\n9-quote\n10-reply\n11-follow\n12-unfollow\n13-block\n14-unblock\n15-direct\n16-remove tweet\n17-remove retweet\n18-remove quote\n19-remove reply\n20-show replies\n21-like\n22-unlike\n23-add vote\n24-vote\n25-removeVote\n26-show my tweets\n27-sign out\n28-exit");
             choice = scanner.nextLine();
 
 
             if (choice.equals("1")) {
-                //getfavstars here
-                //first we call fetch client to get new following or new tweets or followings
-                //check not showing blocked users favstar
-
+                if (!checkToken(OIS, OOS)) {
+                    System.out.println("invalid token");
+                    enterProgram.enter();
+                } else {
+                    String command = "getFavstars";
+                    OOS.writeObject(command);
+                    ArrayList<Tweet> timelineTweets = (ArrayList<Tweet>) OIS.readObject();
+                    for (User following : user.getFollowings()) {
+                        timelineTweets.addAll(following.getTweets());
+                    }
+                    sortByDate(timelineTweets);
+                    if (timelineTweets.size() != 0) {
+                        for (Tweet tweet : timelineTweets) {
+                            showTweet(tweet);
+                        }
+                    } else {
+                        System.out.println("no tweets to show!");
+                    }
+                }
             } else if (choice.equals("2")) {
                 if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
@@ -90,7 +104,7 @@ class Menu {
                     text = scanner.nextLine();
                     System.out.print("photo: ");
                     photoDirectory = scanner.nextLine();
-                    System.out.println("video: ");
+                    System.out.print("video: ");
                     videoDirectory = scanner.nextLine();
                     try {
                         File photoFile = new File(photoDirectory);
@@ -113,7 +127,7 @@ class Menu {
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(tweet);
-                        String result=(String) OIS.readObject();
+                        String result = (String) OIS.readObject();
                         if (result.equals("tweeted successfully")) {
                             user.getTweets().add(tweet);
                         } else {
@@ -145,7 +159,8 @@ class Menu {
                         //change user avatar here in client side and then pass to server to change in server side
                         user.setAvatar(avatar);
                         OOS.writeObject(user);
-                        OIS.readObject();
+                        String result = (String) OIS.readObject();
+                        System.out.println(result);
                     } catch (java.io.IOException e) {
                         System.err.println("file not found");
                     } catch (ClassNotFoundException e) {
@@ -171,7 +186,8 @@ class Menu {
                         user.setHeader(header);
                         OOS.writeObject(command);
                         OOS.writeObject(user);
-                        OIS.readObject();
+                        String result = (String) OIS.readObject();
+                        System.out.println(result);
                     } catch (java.io.IOException e) {
                         System.err.println("file not found");
                     } catch (ClassNotFoundException e) {
@@ -191,7 +207,8 @@ class Menu {
                         user.setBio(bio);
                         OOS.writeObject(command);
                         OOS.writeObject(user);
-                        OIS.readObject();
+                        String result = (String) OIS.readObject();
+                        System.out.println(result);
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
                     } catch (ClassNotFoundException e) {
@@ -225,13 +242,18 @@ class Menu {
                     String tweetID = scanner.nextLine();
                     OOS.writeObject(new String("getTweet"));
                     OOS.writeObject(tweetID);
-                    Tweet tweet=(Tweet) OIS.readObject();
-                    Retweet retweet=new Retweet(tweet.getText(),tweet.getPhoto(),tweet.getVideo(),tweet.getTweetDate(),user.getUsername(),tweet.getHashtag(),tweet.getTweetID(),tweet.getRetweetCount(),tweet.getReplyCount(),tweet.getLikeCount(),tweetID);
+                    Tweet tweet = (Tweet) OIS.readObject();
+                    Retweet retweet = new Retweet(tweet.getText(), tweet.getPhoto(), tweet.getVideo(), tweet.getTweetDate(), user.getUsername(), tweet.getHashtag(), tweet.getTweetID(), tweet.getRetweetCount(), tweet.getReplyCount(), tweet.getLikeCount(), tweetID);
                     OOS.writeObject(new String("addTweet"));
                     OOS.writeObject(retweet);
-                    String result=(String) OIS.readObject();
+                    String result = (String) OIS.readObject();
                     if (result.equals("tweeted successfully")) {
                         user.getTweets().add(retweet);
+                        for (Tweet tweet1 : user.getTweets())
+                            if (tweet1.getTweetID().equals(tweetID)) {
+                                tweet1.setRetweetCount(tweet1.getRetweetCount() + 1);
+                                break;
+                            }
                     } else {
                         System.out.println(result);
                     }
@@ -267,13 +289,18 @@ class Menu {
                             in.read(video);
                             in.close();
                         }
-                        Quote quote = new Quote(text, photo, video, LocalDateTime.now(), user.getUsername(),extractHashtags(text), referredTweetID);
+                        Quote quote = new Quote(text, photo, video, LocalDateTime.now(), user.getUsername(), extractHashtags(text), referredTweetID);
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(quote);
-                        String result=(String) OIS.readObject();
+                        String result = (String) OIS.readObject();
                         if (result.equals("tweeted successfully")) {
                             user.getTweets().add(quote);
+                            for (Tweet tweet1 : user.getTweets())
+                                if (tweet1.getTweetID().equals(referredTweetID)) {
+                                    tweet1.setRetweetCount(tweet1.getRetweetCount() + 1);
+                                    break;
+                                }
                         } else {
                             System.out.println(result);
                         }
@@ -316,13 +343,18 @@ class Menu {
                             in.read(video);
                             in.close();
                         }
-                        Reply reply = new Reply(text, photo, video, LocalDateTime.now(), user.getUsername(),extractHashtags(text), referredTweetID);
+                        Reply reply = new Reply(text, photo, video, LocalDateTime.now(), user.getUsername(), extractHashtags(text), referredTweetID);
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(reply);
-                        String result=(String) OIS.readObject();
+                        String result = (String) OIS.readObject();
                         if (result.equals("tweeted successfully")) {
                             user.getTweets().add(reply);
+                            for (Tweet tweet1 : user.getTweets())
+                                if (tweet1.getTweetID().equals(referredTweetID)) {
+                                    tweet1.setReplyCount(tweet1.getRetweetCount() + 1);
+                                    break;
+                                }
                         } else {
                             System.out.println(result);
                         }
@@ -446,16 +478,29 @@ class Menu {
                     String tweetID = scanner.nextLine();
                     String command = "removeTweet";
                     Tweet t = null;
-                    for (Tweet tweet : user.getTweets()) {
-                        if (tweet.getTweetID().equals(tweetID)) {
-                            t = tweet;
+                    Iterator<Tweet> tweetIterator = user.getTweets().iterator();
+                    while (tweetIterator.hasNext()) {
+                        t = tweetIterator.next();
+                        if (t.getTweetID().equals(tweetID))
                             break;
-                        }
                     }
+                    tweetIterator.remove();
                     try {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         //remove from user
+                        Iterator<Tweet> iterator = user.getTweets().iterator();
+                        while (iterator.hasNext()) {
+                            t = iterator.next();
+                            if (t instanceof Retweet) {
+                                if (((Retweet) t).getReferredTweetID().equals(tweetID)) {
+                                    iterator.remove();
+                                }
+                            } else if (t instanceof Quote) {
+                                if (((Quote) t).getReferredTweetID().equals(tweetID))
+                                    iterator.remove();
+                            }
+                        }
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
                     }
@@ -469,16 +514,22 @@ class Menu {
                     String retweetID = scanner.nextLine();
                     String command = "removeTweet";
                     Tweet t = null;
-                    for (Tweet tweet : user.getTweets()) {
-                        if (tweet.getTweetID().equals(retweetID)) {
-                            t = tweet;
+                    Iterator<Tweet> tweetIterator = user.getTweets().iterator();
+                    while (tweetIterator.hasNext()) {
+                        t = tweetIterator.next();
+                        if (t.getTweetID().equals(retweetID))
                             break;
-                        }
                     }
                     try {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         //remove from user
+                        for (Tweet tweet1 : user.getTweets())
+                            if (tweet1.getTweetID().equals(((Retweet) t).getReferredTweetID())) {
+                                tweet1.setRetweetCount(tweet1.getRetweetCount() - 1);
+                                break;
+                            }
+                        tweetIterator.remove();
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
                     }
@@ -492,16 +543,35 @@ class Menu {
                     String quoteID = scanner.nextLine();
                     String command = "removeTweet";
                     Tweet t = null;
-                    for (Tweet tweet : user.getTweets()) {
-                        if (tweet.getTweetID().equals(quoteID)) {
-                            t = tweet;
+                    Iterator<Tweet> tweetIterator = user.getTweets().iterator();
+                    while (tweetIterator.hasNext()) {
+                        t = tweetIterator.next();
+                        if (t.getTweetID().equals(quoteID))
                             break;
-                        }
                     }
                     try {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         //remove from user
+                        for (Tweet tweet1 : user.getTweets())
+                            if (tweet1.getTweetID().equals(((Quote) t).getReferredTweetID())) {
+                                tweet1.setRetweetCount(tweet1.getRetweetCount() - 1);
+                                break;
+                            }
+                        tweetIterator.remove();
+                        //deleting retweet and quotes to this quote (replies are not deleted because they are not saved)
+                        Iterator<Tweet> iterator = user.getTweets().iterator();
+                        while (iterator.hasNext()) {
+                            t = iterator.next();
+                            if (t instanceof Retweet) {
+                                if (((Retweet) t).getReferredTweetID().equals(quoteID)) {
+                                    iterator.remove();
+                                }
+                            } else if (t instanceof Quote) {
+                                if (((Quote) t).getReferredTweetID().equals(quoteID))
+                                    iterator.remove();
+                            }
+                        }
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
                     }
@@ -525,6 +595,24 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         //remove from user
+                        for (Tweet tweet1 : user.getTweets())
+                            if (tweet1.getTweetID().equals(((Quote) t).getReferredTweetID())) {
+                                tweet1.setReplyCount(tweet1.getRetweetCount() - 1);
+                                break;
+                            }
+                        //deleting retweet and quotes to this reply(replies are not deleted because they are not saved)
+                        Iterator<Tweet> iterator = user.getTweets().iterator();
+                        while (iterator.hasNext()) {
+                            t = iterator.next();
+                            if (t instanceof Retweet) {
+                                if (((Retweet) t).getReferredTweetID().equals(replyID)) {
+                                    iterator.remove();
+                                }
+                            } else if (t instanceof Quote) {
+                                if (((Quote) t).getReferredTweetID().equals(replyID))
+                                    iterator.remove();
+                            }
+                        }
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
                     }
@@ -536,6 +624,7 @@ class Menu {
                 } else {
                     System.out.println("enter tweetID to show replies:");
                     String tweetID = scanner.nextLine();
+                    OOS.writeObject(new String("getReplies"));
                     OOS.writeObject(tweetID);
                     ArrayList<Reply> replies = (ArrayList<Reply>) OIS.readObject();
                     for (Reply reply : replies)
@@ -547,12 +636,23 @@ class Menu {
                 String tweetID = scanner.nextLine();
                 OOS.writeObject(command);
                 OOS.writeObject(tweetID);
+                for (Tweet tweet : user.getTweets())
+                    if (tweet.getTweetID().equals(tweetID)) {
+                        tweet.setLikeCount(tweet.getLikeCount() + 1);
+                        break;
+                    }
+
             } else if (choice.equals("22")) {
                 String command = "unlike";
                 System.out.print("tweetID: ");
                 String tweetID = scanner.nextLine();
                 OOS.writeObject(command);
                 OOS.writeObject(tweetID);
+                for (Tweet tweet : user.getTweets())
+                    if (tweet.getTweetID().equals(tweetID)) {
+                        tweet.setLikeCount(tweet.getLikeCount() - 1);
+                        break;
+                    }
             } else if (choice.equals("23")) {
                 if (!checkToken(OIS, OOS)) {
                     System.out.println("invalid token");
@@ -563,7 +663,8 @@ class Menu {
                     text = scanner.nextLine();
                     System.out.print("photo: ");
                     photoDirectory = scanner.nextLine();
-                    System.out.println("video: ");
+                    System.out.print("video: ");
+                    videoDirectory = scanner.nextLine();
                     System.out.print("option 1: ");
                     String option1 = scanner.nextLine();
                     System.out.print("option 2: ");
@@ -572,7 +673,6 @@ class Menu {
                     String option3 = scanner.nextLine();
                     System.out.print("option 4: ");
                     String option4 = scanner.nextLine();
-                    videoDirectory = scanner.nextLine();
                     try {
                         File photoFile = new File(photoDirectory);
                         byte[] photo = null;
@@ -594,7 +694,7 @@ class Menu {
                         String command = "addTweet";
                         OOS.writeObject(command);
                         OOS.writeObject(vote);
-                        String result=(String) OIS.readObject();
+                        String result = (String) OIS.readObject();
                         if (result.equals("tweeted successfully")) {
                             user.getTweets().add(vote);
                         } else {
@@ -641,15 +741,35 @@ class Menu {
                         OOS.writeObject(command);
                         OOS.writeObject(t);
                         //remove from user
+                        Iterator<Tweet> iterator = user.getTweets().iterator();
+                        while (iterator.hasNext()) {
+                            t = iterator.next();
+                            if (t instanceof Retweet) {
+                                if (((Retweet) t).getReferredTweetID().equals(voteID)) {
+                                    iterator.remove();
+                                }
+                            } else if (t instanceof Quote) {
+                                if (((Quote) t).getReferredTweetID().equals(voteID))
+                                    iterator.remove();
+                            }
+                        }
                     } catch (java.io.IOException e) {
                         e.printStackTrace();
                     }
                 }
-            }else if (choice.equals("26")) {
-                for (Tweet tweet: user.getTweets()){
+            } else if (choice.equals("26")) {
+                for (Tweet tweet : user.getTweets()) {
                     showTweet(tweet);
                 }
-            } else if (choice.equals("n")) {
+            } else if (choice.equals("27")) {
+                File file = new File("UserInfo/token.bin");
+                if (file.delete()) {
+                    System.out.println("signed out successfully");
+                } else {
+                    System.out.println("failed to sign out");
+                }
+                enterProgram.enter();
+            } else if (choice.equals("28")) {
                 break;
             } else {
                 System.out.println("wrong input");
@@ -702,15 +822,16 @@ class Menu {
     public void setClient(User user) {
         this.user = user;
     }
-    public String showTweetTime(LocalDateTime tweetDate){
+
+    public String showTweetTime(LocalDateTime tweetDate) {
         Duration duration = Duration.between(tweetDate, LocalDateTime.now());
         long minutes = duration.toMinutes();
-        if(minutes<60){
-            return (minutes+"m");
-        }else if(minutes<60*24){
-            return ((minutes/60)+"h");
+        if (minutes < 60) {
+            return (minutes + "m");
+        } else if (minutes < 60 * 24) {
+            return ((minutes / 60) + "h");
         } else {
-            return (tweetDate.getDayOfMonth()+" "+tweetDate.getMonth().toString());
+            return (tweetDate.getDayOfMonth() + " " + tweetDate.getMonth().toString());
         }
     }
 
@@ -724,7 +845,7 @@ class Menu {
             OOS.writeObject("getDisplayInfo");
             OOS.writeObject(tweet.getTweetID());
             DisplayInfo displayInfo = (DisplayInfo) OIS.readObject();
-            System.out.println(displayInfo.getUser().getFirstName()+" "+displayInfo.getUser().getLastName() + " retweeted");
+            System.out.println(displayInfo.getUser().getFirstName() + " " + displayInfo.getUser().getLastName() + " retweeted");
             //showing referred tweet
             showTweet(referredTweet);
         } else if (tweet instanceof Quote) {
@@ -738,14 +859,12 @@ class Menu {
             DisplayInfo quoteOwnerDisplayInfo = (DisplayInfo) OIS.readObject();
             //show result
             System.out.println(tweet.getTweetID());
-            System.out.println();
-            System.out.println(quoteOwnerDisplayInfo.getUser().getFirstName()+" "+quoteOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(quoteOwnerDisplayInfo.getUser().getFirstName() + " " + quoteOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername() + "  " + showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             //show referred tweet
             System.out.println("----------------------------------------------------------------------------------------");
             System.out.println(referredTweetDisplayInfo.getTweet().getTweetID());
-            System.out.println();
-            System.out.println(referredTweetDisplayInfo.getUser().getFirstName()+" "+referredTweetDisplayInfo.getUser().getLastName() + "  " + "@" + referredTweetDisplayInfo.getTweet().getAuthorUsername());
+            System.out.println(referredTweetDisplayInfo.getUser().getFirstName() + " " + referredTweetDisplayInfo.getUser().getLastName() + "  " + "@" + referredTweetDisplayInfo.getTweet().getAuthorUsername());
             System.out.println(referredTweetDisplayInfo.getTweet().getText());
             System.out.println("----------------------------------------------------------------------------------------");
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
@@ -761,44 +880,41 @@ class Menu {
             String referredOwnerUsername = (String) OIS.readObject();
             //show reply
             System.out.println(tweet.getTweetID());
-            System.out.println();
-            System.out.println(replyDisplayInfo.getUser().getFirstName()+" "+replyDisplayInfo.getUser().getLastName()+"  @"+tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(replyDisplayInfo.getUser().getFirstName() + " " + replyDisplayInfo.getUser().getLastName() + "  @" + tweet.getAuthorUsername() + "  " + showTweetTime(tweet.getTweetDate()));
             System.out.println("replying to  @" + referredOwnerUsername);
             System.out.println(tweet.getText());
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
             System.out.println();
-        } else if(tweet instanceof Vote){
-            float allVotesCount=((Vote) tweet).getOption1Count()+ ((Vote) tweet).getOption2Count()+ ((Vote) tweet).getOption3Count()+ ((Vote) tweet).getOption4Count();
-            float option1percent=0;
-            float option2percent=0;
-            float option3percent=0;
-            float option4percent=0;
-            if(allVotesCount!=0){
-                 option1percent=((Vote) tweet).getOption1Count()/allVotesCount;
-                 option2percent=((Vote) tweet).getOption2Count()/allVotesCount;
-                 option3percent=((Vote) tweet).getOption3Count()/allVotesCount;
-                 option4percent=((Vote) tweet).getOption4Count()/allVotesCount;
+        } else if (tweet instanceof Vote) {
+            float allVotesCount = ((Vote) tweet).getOption1Count() + ((Vote) tweet).getOption2Count() + ((Vote) tweet).getOption3Count() + ((Vote) tweet).getOption4Count();
+            float option1percent = 0;
+            float option2percent = 0;
+            float option3percent = 0;
+            float option4percent = 0;
+            if (allVotesCount != 0) {
+                option1percent = ((Vote) tweet).getOption1Count() / allVotesCount;
+                option2percent = ((Vote) tweet).getOption2Count() / allVotesCount;
+                option3percent = ((Vote) tweet).getOption3Count() / allVotesCount;
+                option4percent = ((Vote) tweet).getOption4Count() / allVotesCount;
             }
             OOS.writeObject("getDisplayInfo");
             OOS.writeObject(tweet.getTweetID());
             DisplayInfo tweetOwnerDisplayInfo = (DisplayInfo) OIS.readObject();
             System.out.println(tweet.getTweetID());
-            System.out.println();
-            System.out.println(tweetOwnerDisplayInfo.getUser().getFirstName()+" "+tweetOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(tweetOwnerDisplayInfo.getUser().getFirstName() + " " + tweetOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername() + "  " + showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
-            System.out.println(((Vote) tweet).getOption1()+": "+option1percent);
-            System.out.println(((Vote) tweet).getOption2()+": "+option2percent);
-            System.out.println(((Vote) tweet).getOption3()+": "+option3percent);
-            System.out.println(((Vote) tweet).getOption4()+": "+option4percent);
-            System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount()+" votes:"+allVotesCount);
+            System.out.println(((Vote) tweet).getOption1() + ": " + option1percent);
+            System.out.println(((Vote) tweet).getOption2() + ": " + option2percent);
+            System.out.println(((Vote) tweet).getOption3() + ": " + option3percent);
+            System.out.println(((Vote) tweet).getOption4() + ": " + option4percent);
+            System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount() + " votes:" + allVotesCount);
             System.out.println();
-        }else {
+        } else {
             OOS.writeObject("getDisplayInfo");
             OOS.writeObject(tweet.getTweetID());
             DisplayInfo tweetOwnerDisplayInfo = (DisplayInfo) OIS.readObject();
             System.out.println(tweet.getTweetID());
-            System.out.println();
-            System.out.println(tweetOwnerDisplayInfo.getUser().getFirstName()+" "+tweetOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername()+"  "+showTweetTime(tweet.getTweetDate()));
+            System.out.println(tweetOwnerDisplayInfo.getUser().getFirstName() + " " + tweetOwnerDisplayInfo.getUser().getLastName() + "  " + "@" + tweet.getAuthorUsername() + "  " + showTweetTime(tweet.getTweetDate()));
             System.out.println(tweet.getText());
             System.out.println("replies:" + tweet.getReplyCount() + "  retweets:" + tweet.getRetweetCount() + "  likes:" + tweet.getLikeCount());
             System.out.println();
