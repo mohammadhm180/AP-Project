@@ -1,4 +1,4 @@
-package com.twitter;
+package com.tweeter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

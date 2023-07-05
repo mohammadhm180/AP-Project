@@ -1,0 +1,13 @@
+.root-pane {
+    -fx-background-color: #f4f4f4;
+}
+
+#rootPane {
+    -fx-alignment: center;
+}
+
+.button {
+    -fx-font-size: 14px;
+    -fx-background-color: #1DA1F2;
+    -fx-text-fill: white;
+}

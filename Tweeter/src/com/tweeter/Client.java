@@ -1,4 +1,4 @@
-package com.twitter;
+package com.tweeter;
 
 import io.jsonwebtoken.io.IOException;
 
@@ -245,7 +245,7 @@ class Menu {
                     OOS.writeObject(new String("getTweet"));
                     OOS.writeObject(tweetID);
                     Tweet tweet = (Tweet) OIS.readObject();
-                    Retweet retweet = new Retweet(tweet.getText(), tweet.getPhoto(), tweet.getVideo(), tweet.getTweetDate(), user.getUsername(), tweet.getHashtag(), tweet.getTweetID(), tweet.getRetweetCount(), tweet.getReplyCount(), tweet.getLikeCount(), tweetID);
+                    Retweet retweet = new Retweet(tweet.getText(), tweet.getPhoto(), tweet.getVideo(), tweet.getTweetDate(), user.getUsername(), tweet.getHashtag(), tweet.getTweetID(), tweet.getRetweetCount(), tweet.getReplyCount(), tweet.getLikeCount());
                     OOS.writeObject(new String("addTweet"));
                     OOS.writeObject(retweet);
                     String result = (String) OIS.readObject();

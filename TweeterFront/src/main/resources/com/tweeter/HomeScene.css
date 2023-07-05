@@ -1,0 +1,123 @@
+
+.root-grid-pane {
+    -fx-background-color: #F0F8FF;
+    -fx-padding: 20px;
+}
+
+.button {
+    -fx-background-color: #00acee;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 4px 20px;
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #00acee;
+}
+
+.button:pressed {
+    -fx-background-color: #00acee;
+}
+
+.text-field {
+    -fx-background-color: #CCCCCC;
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+    -fx-text-fill: black;
+    -fx-border-color: #00acee;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.text-field:focused {
+    -fx-border-color: #CCCCCC;
+}
+
+.cell-vbox {
+    -fx-spacing: 15px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+    -fx-border-color: #00acee;
+    -fx-background-color: #CCCCCC;
+}
+
+.cell-vbox .child-node {
+    /*-fx-padding: 20px; !*  *!*/
+    -fx-background-color: #f0f0f0;
+}
+
+.list-view {
+    -fx-background-color: #CCCCCC;
+    /*-fx-control-inner-background: #ffffff;*/
+    /*-fx-padding: 10px;*/
+
+}
+
+.list-cell {
+    -fx-text-fill: #00acee;
+    /*-fx-padding: 10px;*/
+    /*-fx-spacing: 5px;*/
+}
+
+.label {
+    -fx-font-family: "Arial";
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+/*.media-view {
+    -fx-border-style: solid;
+    -fx-border-width: 10px;
+    -fx-border-color: black;
+    -fx-font-weight: bold;
+}*/
+
+.hyperlink {
+    -fx-text-fill: #333333;
+    -fx-font-family: "Arial";
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #00acee;
+    -fx-cursor: hand;
+    -fx-underline: true;
+}
+
+.radio-button {
+    -fx-font-size: 14px;
+    -fx-text-fill: #000000;
+}
+
+.radio-button:selected .dot {
+    -fx-background-color: #00acee;
+    -fx-border-color: #007bff;
+}
+
+.radio-button .dot {
+    -fx-background-radius: 60%;
+    -fx-border-radius: 60%;
+    -fx-background-color: transparent;
+    -fx-border-width: 2px;
+    -fx-border-color: #00acee;
+    -fx-pref-width: 10px;
+    -fx-pref-height: 10px;
+    -fx-cursor: hand;
+}
+.radio-button:hover .dot {
+    -fx-border-color: #007bff;
+    -fx-cursor: hand;
+}
+
+
+
+
+
+
+
+

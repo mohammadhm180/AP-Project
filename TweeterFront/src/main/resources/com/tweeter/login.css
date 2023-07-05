@@ -1,0 +1,10 @@
+.error-message {
+    -fx-text-fill: red;
+    -fx-font-size: 14px;
+}
+
+.primary {
+    -fx-background-color: #1DA1F2;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}

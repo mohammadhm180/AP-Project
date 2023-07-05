@@ -1,4 +1,4 @@
-package com.twitter;
+package com.tweeter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

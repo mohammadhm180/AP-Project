@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane maxHeight="-Infinity" minWidth="-Infinity" styleClass="root-grid-pane" stylesheets="@HomeScene.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tweeter.ShowProfileTweetsController">
+    <padding>
+        <Insets left="45.0" right="45.0" top="5.0" />
+    </padding>
+   <center>
+          <ListView fx:id="tweetList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="560.0" prefWidth="875.0" styleClass="tweet-list-view" stylesheets="@HomeScene.css" BorderPane.alignment="CENTER">
+              <BorderPane.margin>
+                  <Insets top="3.0" />
+              </BorderPane.margin>
+          </ListView>
+   </center>
+   <top>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+                  <Button fx:id="HomeButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#back" prefHeight="64.0" prefWidth="134.0" styleClass="button22" stylesheets="@style.css" text="back" />
+            <Label prefHeight="16.0" prefWidth="631.0" />
+                  <ImageView fx:id="iconImage" fitHeight="87.0" fitWidth="98.0" pickOnBounds="true" preserveRatio="true" />
+         </children>
+      </HBox>
+   </top>
+</BorderPane>

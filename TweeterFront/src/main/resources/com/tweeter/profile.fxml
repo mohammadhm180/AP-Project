@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.RadialGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" minWidth="-Infinity" styleClass="root-grid-pane" stylesheets="@HomeScene.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tweeter.ProfileController">
+    <center>
+        <BorderPane prefWidth="941.0" BorderPane.alignment="CENTER">
+            <center>
+                <ListView fx:id="tweetList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="560.0" prefWidth="875.0" styleClass="tweet-list-view" stylesheets="@HomeScene.css" BorderPane.alignment="CENTER">
+                    <BorderPane.margin>
+                        <Insets top="3.0" />
+                    </BorderPane.margin>
+                </ListView>
+            </center>
+         <padding>
+            <Insets left="100.0" right="30.0" />
+         </padding>
+         <top>
+            <BorderPane minHeight="30.0" prefHeight="460.0" prefWidth="854.0" style="-fx-border-color: black;" BorderPane.alignment="CENTER">
+               <top>
+                  <ImageView fx:id="headerImageView" fitHeight="170.0" fitWidth="510.0" pickOnBounds="true" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                     </BorderPane.margin></ImageView>
+               </top>
+               <center>
+                  <VBox minWidth="-Infinity" spacing="10.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Label fx:id="fullNameLabel" prefHeight="27.0" prefWidth="382.0" styleClass="font1" stylesheets="@style.css" />
+                        <Label fx:id="usernameLabel" styleClass="font2" stylesheets="@style.css" />
+                        <Label fx:id="bioLabel" minHeight="-Infinity" prefWidth="470.0" wrapText="true">
+                           <font>
+                              <Font name="Annai MN Regular" size="16.0" />
+                           </font>
+                        </Label>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <ImageView fx:id="mapImageView" fitHeight="35.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+                              <Label fx:id="locationLabel" minHeight="-Infinity" prefWidth="470.0" wrapText="true">
+                                 <font>
+                                    <Font name="Annai MN Regular" size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <ImageView fx:id="linkImageView" fitHeight="35.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+                              <Hyperlink fx:id="websiteHyperlink" minHeight="-Infinity" onAction="#hyperlinkPressed" prefWidth="441.0" wrapText="true">
+                                 <font>
+                                    <Font size="19.0" />
+                                 </font>
+                              </Hyperlink>
+                           </children>
+                        </HBox>
+                     </children>
+                     <BorderPane.margin>
+                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                     </BorderPane.margin></VBox>
+               </center>
+               <right>
+                  <Button mnemonicParsing="false" onAction="#editSelected" prefHeight="51.0" prefWidth="123.0" styleClass="button3" stylesheets="@style.css" text="Edit Profile" BorderPane.alignment="CENTER">
+                     <textFill>
+                        <RadialGradient centerX="0.5" centerY="0.5" radius="0.5">
+                           <stops>
+                              <Stop>
+                                 <color>
+                                    <Color />
+                                 </color>
+                              </Stop>
+                              <Stop offset="1.0">
+                                 <color>
+                                    <Color red="1.0" green="1.0" blue="1.0" />
+                                 </color>
+                              </Stop>
+                           </stops>
+                        </RadialGradient>
+                     </textFill>
+                     <BorderPane.margin>
+                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                     </BorderPane.margin>
+                  </Button>
+               </right>
+               <bottom>
+                  <HBox prefHeight="37.0" prefWidth="838.0" spacing="14.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Label fx:id="tweetNumberLabel" prefHeight="37.0" prefWidth="35.0" translateX="10.0">
+                           <font>
+                              <Font name="Arial Bold" size="25.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="81.0" prefWidth="197.0" text="Tweets">
+                           <font>
+                              <Font name="Arial Bold" size="30.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="exitButton1" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showTweets" prefHeight="38.0" prefWidth="136.0" styleClass="button22" stylesheets="@style.css" text="Show Tweets" />
+                     </children>
+                  </HBox>
+               </bottom>
+               <left>
+                  <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <ImageView fx:id="avatarImageView" fitHeight="120.0" fitWidth="120.0" pickOnBounds="true">
+                           <VBox.margin>
+                              <Insets bottom="12.0" left="12.0" right="12.0" top="6.0" />
+                           </VBox.margin>
+                        </ImageView>
+                        <HBox prefHeight="20.0" prefWidth="481.0" spacing="2.0">
+                           <children>
+                              <Label fx:id="followerNumberLabel" prefHeight="34.0" prefWidth="66.0">
+                                 <font>
+                                    <Font size="28.0" />
+                                 </font>
+                              </Label>
+                              <Hyperlink onAction="#showFollowers" prefHeight="32.0" prefWidth="117.0" text="Followers">
+                                 <font>
+                                    <Font size="19.0" />
+                                 </font>
+                              </Hyperlink>
+                           </children>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </HBox>
+                        <HBox prefHeight="40.0" prefWidth="481.0" spacing="2.0">
+                           <children>
+                              <Label fx:id="followingNumberLabel" prefHeight="35.0" prefWidth="71.0">
+                                 <font>
+                                    <Font size="29.0" />
+                                 </font>
+                              </Label>
+                              <Hyperlink onAction="#showFollowings" prefHeight="32.0" prefWidth="141.0" text="Followings">
+                                 <font>
+                                    <Font size="19.0" />
+                                 </font>
+                              </Hyperlink>
+                           </children>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </left>
+            </BorderPane>
+         </top>
+        </BorderPane>
+    </center>
+    <padding>
+        <Insets left="45.0" right="45.0" top="5.0" />
+    </padding>
+   <left>
+      <BorderPane BorderPane.alignment="CENTER">
+         <right>
+            <VBox spacing="15.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ImageView fx:id="iconImage" fitHeight="76.0" fitWidth="86.0" pickOnBounds="true" preserveRatio="true">
+                     <VBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </VBox.margin></ImageView>
+                  <Button fx:id="HomeButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#homeSelected" styleClass="button22" stylesheets="@style.css" text="Home" />
+                  <Button fx:id="searchHashtagButton1" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#addTweet" styleClass="button22" stylesheets="@style.css" text="Add Tweet" />
+                  <Button fx:id="directButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#messagesSelected" styleClass="button22" stylesheets="@style.css" text="Messages" />
+                  <Button fx:id="profileButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="button22" stylesheets="@style.css" text="Profile" />
+                  <Button fx:id="searchUserButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#searchUser" styleClass="button22" stylesheets="@style.css" text="Search User" />
+                  <Button fx:id="searchHashtagButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#searchHashtag" styleClass="button22" stylesheets="@style.css" text="Search Hashtag" />
+                  <Button fx:id="exitButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#exitSelected" styleClass="button22" stylesheets="@style.css" text="Exit" />
+                  <TextField editable="false" visible="false" />
+               </children>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+            </VBox>
+         </right>
+         <padding>
+            <Insets left="15.0" />
+         </padding>
+      </BorderPane>
+   </left>
+</BorderPane>

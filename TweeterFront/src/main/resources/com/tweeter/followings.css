@@ -1,0 +1,15 @@
+.username {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.fullname {
+    -fx-font-size: 14px;
+    -fx-opacity: 0.6;
+}
+
+.user-item {
+    -fx-background-color: #f5f8fa; /* Set the background color for user items */
+    -fx-padding: 10px;
+    -fx-border-radius: 5px;
+}

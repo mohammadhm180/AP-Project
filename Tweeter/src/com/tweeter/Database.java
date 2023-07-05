@@ -1,4 +1,4 @@
-package com.twitter;
+package com.tweeter;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -16,13 +16,14 @@ public class Database {
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS users(username VARCHAR(50),firstName VARCHAR(50),lastName VARCHAR(50),email VARCHAR(60),phoneNumber VARCHAR(16),password VARCHAR(25),country VARCHAR(40),avatar LONGBLOB,header LONGBLOB,bio VARCHAR(160),location VARCHAR(150),webAddress VARCHAR(100),birthYear INT,birthMonth INT,birthDay INT,signUpYear INT,signUpMonth INT,signUpDay INT,signUpHour INT,signUpMinute INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tweets(tweetID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),tweetYear INT,tweetMonth INT,tweetDay INT,tweetHour INT,tweetMinute INT,likeCount INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS followInfo(followerUN VARCHAR(50),followingUN VARCHAR(50))");
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS votes(voteID VARCHAR(100),retweetCount INT ,replyCount INT,likeCount INT,authorUsername VARCHAR(50),voteYear INT,voteMonth INT,voteDay INT,voteHour INT,voteMinute INT,text VARCHAR(280),option1 VARCHAR(100),option2 VARCHAR(100),option3 VARCHAR(100),option4 VARCHAR(100),option1Count INT,option2Count INT,option3Count INT,option4Count INT)");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS votes(voteID VARCHAR(100),retweetCount INT ,replyCount INT,likeCount INT,authorUsername VARCHAR(50),voteYear INT,voteMonth INT,voteDay INT,voteHour INT,voteMinute INT,text VARCHAR(280),option1 VARCHAR(100),option2 VARCHAR(100),option3 VARCHAR(100),option4 VARCHAR(100),option1Count INT,option2Count INT,option3Count INT,option4Count INT,photo LONGBLOB,video LONGBLOB)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS retweets(retweetID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),retweetYear INT,retweetMonth INT,retweetDay INT,retweetHour INT,retweetMinute INT,referredTweetID VARCHAR(100),likeCount INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS quotes(quoteID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),quoteYear INT,quoteMonth INT,quoteDay INT,quoteHour INT,quoteMinute INT,referredTweetID VARCHAR(100),likeCount INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS replies(replyID VARCHAR(100),text VARCHAR(280),photo LONGBLOB,video LONGBLOB,retweetCount INT ,replyCount INT ,authorUsername VARCHAR(50),replyYear INT,replyMonth INT,replyDay INT,replyHour INT,replyMinute INT,referredTweetID VARCHAR(100),likeCount INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS directs(sender VARCHAR(50),receiver VARCHAR(50),text VARCHAR(300),directYear INT,directMonth INT,directDay INT,directHour INT,directMinute INT)");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS blockInfo(blocker VARCHAR(50),blocked VARCHAR(50))");
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS hashtagInfo(tweetID VARCHAR(100),hashtagName VARCHAR(30),hashtagYear INT,hashtagMonth INT,hashtagDay INT,hashtagHour INT,hashtagMinute INT)");
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS likeInfo(tweetID VARCHAR(100),likerID VARCHAR(50))");
     }
     public void addUser(User user) throws SQLException {
         PreparedStatement stm=conn.prepareStatement("INSERT INTO users (username,firstName,lastName,email,phoneNumber,password,country,avatar,header,bio,location,webAddress,birthYear,birthMonth,birthDay,signUpYear ,signUpMonth ,signUpDay ,signUpHour ,signUpMinute) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -104,13 +105,49 @@ public class Database {
         while (sendRs.next()){
             sentMessages.add(new Message(username,sendRs.getString("receiver"),sendRs.getString("text"),LocalDateTime.of(sendRs.getInt("directYear"),sendRs.getInt("directMonth"),sendRs.getInt("directDay"),sendRs.getInt("directHour"),sendRs.getInt("directMinute"))));
         }
-        sendDirectStm.close();
         PreparedStatement receiveDirectStm= conn.prepareStatement("SELECT * FROM directs WHERE receiver=?");
         receiveDirectStm.setString(1,username);
         ResultSet receiveRs=receiveDirectStm.executeQuery();
         while (receiveRs.next()){
-            receivedMessages.add(new Message(sendRs.getString("sender"),username,sendRs.getString("text"),LocalDateTime.of(sendRs.getInt("directYear"),sendRs.getInt("directMonth"),sendRs.getInt("directDay"),sendRs.getInt("directHour"),sendRs.getInt("directMinute"))));
+            receivedMessages.add(new Message(receiveRs.getString("sender"),username,receiveRs.getString("text"),LocalDateTime.of(receiveRs.getInt("directYear"),receiveRs.getInt("directMonth"),receiveRs.getInt("directDay"),receiveRs.getInt("directHour"),receiveRs.getInt("directMinute"))));
         }
+
+        ArrayList<Direct> directs=user.getDirects();
+        for (Message message:sentMessages){
+            boolean flag=false;
+            for (Direct direct:directs){
+                if(message.getReceiver().equals(direct.getUsername())){
+                    direct.getSentMessages().add(message);
+                    flag=true;
+                    break;
+                }
+            }
+            if(flag){
+                //message added
+            } else {
+                Direct direct=new Direct(message.getReceiver());
+                direct.getSentMessages().add(message);
+                directs.add(direct);
+            }
+        }
+        for (Message message:receivedMessages){
+            boolean flag=false;
+            for (Direct direct:directs){
+                if(message.getUsername().equals(direct.getUsername())){
+                    direct.getReceivedMessages().add(message);
+                    flag=true;
+                    break;
+                }
+            }
+            if(flag){
+                //message added
+            } else {
+                Direct direct=new Direct(message.getUsername());
+                direct.getReceivedMessages().add(message);
+                directs.add(direct);
+            }
+        }
+        sendDirectStm.close();
         receiveDirectStm.close();
         //filling blocked users list
         ArrayList<String> blockedUsers=user.getBlockedUsers();
@@ -131,6 +168,7 @@ public class Database {
         rsProfile.next();
         User user=new User(username,rsProfile.getString("firstName"),rsProfile.getString("lastName"),null,null,null,null,null,null);
         user.setAvatar(rsProfile.getBytes("avatar"));
+        user.setBio(rsProfile.getString("bio"));
         profileStm.close();
         return user;
     }
@@ -190,7 +228,7 @@ public class Database {
         voteStm.setString(1,voteID);
         ResultSet voteRs=voteStm.executeQuery();
         voteRs.next();
-        Vote vote=new Vote(voteRs.getString("text"),null,null,LocalDateTime.of(voteRs.getInt("voteYear"),voteRs.getInt("voteMonth"),voteRs.getInt("voteDay"),voteRs.getInt("voteHour"),voteRs.getInt("voteMinute")),voteRs.getString("authorUsername"),getHashtagsOfTweet(voteRs.getString("voteID")),voteRs.getInt("replyCount"),voteRs.getInt("retweetCount"),voteRs.getInt("likeCount"),voteRs.getString("option1"),voteRs.getString("option2"),voteRs.getString("option3"),voteRs.getString("option4"),voteRs.getInt("option1Count"),voteRs.getInt("option2Count"),voteRs.getInt("option3Count"),voteRs.getInt("option4Count"),voteRs.getString("voteID"));
+        Vote vote=new Vote(voteRs.getString("text"),voteRs.getBytes("photo"),voteRs.getBytes("video"),LocalDateTime.of(voteRs.getInt("voteYear"),voteRs.getInt("voteMonth"),voteRs.getInt("voteDay"),voteRs.getInt("voteHour"),voteRs.getInt("voteMinute")),voteRs.getString("authorUsername"),getHashtagsOfTweet(voteRs.getString("voteID")),voteRs.getInt("replyCount"),voteRs.getInt("retweetCount"),voteRs.getInt("likeCount"),voteRs.getString("option1"),voteRs.getString("option2"),voteRs.getString("option3"),voteRs.getString("option4"),voteRs.getInt("option1Count"),voteRs.getInt("option2Count"),voteRs.getInt("option3Count"),voteRs.getInt("option4Count"),voteRs.getString("voteID"));
         voteStm.close();
         return vote;
     }
@@ -344,7 +382,7 @@ public class Database {
     }
 
     public void addVote(Vote vote) throws SQLException {
-        PreparedStatement stm=conn.prepareStatement("INSERT INTO votes (voteID,retweetCount,replyCount,likeCount,authorUsername,voteYear,voteMonth,voteDay,voteHour,voteMinute,text,option1,option2,option3,option4,option1Count,option2Count,option3Count,option4Count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement stm=conn.prepareStatement("INSERT INTO votes (voteID,retweetCount,replyCount,likeCount,authorUsername,voteYear,voteMonth,voteDay,voteHour,voteMinute,text,option1,option2,option3,option4,option1Count,option2Count,option3Count,option4Count,photo,video) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         stm.setString(1, UUID.randomUUID().toString());
         stm.setInt(2,vote.getRetweetCount());
         stm.setInt(3,vote.getReplyCount());
@@ -364,6 +402,8 @@ public class Database {
         stm.setInt(17,vote.getOption2Count());
         stm.setInt(18,vote.getOption3Count());
         stm.setInt(19,vote.getOption4Count());
+        stm.setBytes(20,vote.getPhoto());
+        stm.setBytes(21,vote.getVideo());
         stm.executeUpdate();
         stm.close();
     }
@@ -852,7 +892,7 @@ public class Database {
         addStatement.close();
     }
 
-    public void like(Tweet post)throws SQLException{
+    public void like(Tweet post,String doer)throws SQLException{
         if (post instanceof Quote) {
             PreparedStatement updateStatement = conn.prepareStatement("UPDATE quotes SET likeCount=? WHERE quoteID=?");
             updateStatement.setInt(1,post.getLikeCount()+1);
@@ -878,9 +918,14 @@ public class Database {
             updateStatement.executeUpdate();
             updateStatement.close();
         }
+        PreparedStatement addStatement = conn.prepareStatement("INSERT INTO likeInfo(tweetID,likerID) VALUES (?,?)");
+        addStatement.setString(1,post.getTweetID());
+        addStatement.setString(2,doer);
+        addStatement.executeUpdate();
+        addStatement.close();
     }
 
-    public void unLike(Tweet post) throws SQLException{
+    public void unLike(Tweet post,String doer) throws SQLException{
         if (post instanceof Quote) {
             PreparedStatement updateStatement = conn.prepareStatement("UPDATE quotes SET likeCount=? WHERE quoteID=?");
             updateStatement.setInt(1,post.getLikeCount()-1);
@@ -906,6 +951,12 @@ public class Database {
             updateStatement.executeUpdate();
             updateStatement.close();
         }
+
+        PreparedStatement stm=conn.prepareStatement("DELETE FROM likeInfo WHERE tweetID=? AND likerID=?");
+        stm.setString(1,post.getTweetID());
+        stm.setString(2,doer);
+        stm.executeUpdate();
+        stm.close();
     }
 
     public ArrayList<Tweet> getTweetFavstars() throws SQLException {
@@ -913,21 +964,21 @@ public class Database {
         Statement getStatement = conn.createStatement();
         ResultSet rs = getStatement.executeQuery("SELECT * FROM tweets");
         while (rs.next()) {
-            if (rs.getInt("likeCount") > 9)
+            if (rs.getInt("likeCount") > 0)
                 result.add(getTweet(rs.getString("tweetID")));
         }
         rs = getStatement.executeQuery("SELECT * FROM quotes");
         while (rs.next()) {
-            if (rs.getInt("likeCount") > 9)
+            if (rs.getInt("likeCount") > 0)
                 result.add(getQuote(rs.getString("quoteID")));
         }
         rs = getStatement.executeQuery("SELECT * FROM replies");
         while (rs.next()) {
-            if (rs.getInt("likeCount") > 9)
+            if (rs.getInt("likeCount") > 0)
                 result.add(getReply(rs.getString("replyID")));
         }
         while (rs.next()) {
-            if (rs.getInt("likeCount") > 9)
+            if (rs.getInt("likeCount") > 0)
                 result.add(getVote(rs.getString("voteID")));
         }
         rs.close();

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="rootPane" prefHeight="520.0" prefWidth="527.0" styleClass="root-pane" stylesheets="@signup.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tweeter.signupController">
+    <children>
+        <TextField fx:id="usernameField" layoutX="184.0" layoutY="74.0" promptText="Username" />
+        <TextField fx:id="firstNameField" layoutX="184.0" layoutY="116.0" promptText="First Name" />
+        <TextField fx:id="lastNameField" layoutX="184.0" layoutY="159.0" promptText="Last Name" />
+        <TextField fx:id="emailField" layoutX="184.0" layoutY="198.0" promptText="Email" />
+        <TextField fx:id="phoneField" layoutX="184.0" layoutY="241.0" promptText="Phone Number" />
+        <PasswordField fx:id="passwordField" layoutX="184.0" layoutY="280.0" promptText="Password" />
+        <DatePicker fx:id="birthdatePicker" layoutX="184.0" layoutY="356.0" promptText="Birthdate" />
+        <Button fx:id="signupButton" layoutX="195.0" layoutY="432.0" onAction="#signupButtonPressed" prefHeight="33.0" prefWidth="128.0" stylesheets="@signup.css" text="Sign Up" />
+      <Label layoutX="152.0" layoutY="14.0" prefHeight="47.0" prefWidth="224.0" styleClass="font1" stylesheets="@style.css" text="Join Twitter today" />
+      <Label fx:id="errorMessageLabel" layoutX="106.0" layoutY="456.0" prefHeight="56.0" prefWidth="420.0" styleClass="error-message" stylesheets="@login.css" />
+      <PasswordField fx:id="repeatPasswordField" layoutX="184.0" layoutY="317.0" promptText="Repeat Password" />
+      <ComboBox fx:id="comboBox" layoutX="184.0" layoutY="392.0" prefWidth="150.0" promptText="Country" />
+      <Button layoutX="25.0" layoutY="24.0" mnemonicParsing="false" onAction="#backButtonPressed" text="Back" />
+    </children>
+</AnchorPane>

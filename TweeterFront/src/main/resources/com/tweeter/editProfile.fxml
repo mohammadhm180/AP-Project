@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox id="rootPane" fx:id="rootPane" prefHeight="419.0" prefWidth="484.0" spacing="17.0" stylesheets="@editProfile.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tweeter.EditProfileController">
+    <HBox prefHeight="100.0" prefWidth="200.0">
+        <children>
+            <Button onAction="#backSelected" prefHeight="29.0" prefWidth="52.0" text="Back" />
+            <ImageView fx:id="twitterLogo" fitHeight="41.0" fitWidth="59.0" pickOnBounds="true" preserveRatio="true" translateX="200.0" />
+        </children>
+    </HBox>
+    <Label styleClass="title-label" text="Edit Profile" />
+    <HBox spacing="5">
+        <Label text="First Name:" />
+        <TextField fx:id="firstNameField" />
+    </HBox>
+    <HBox spacing="5">
+        <Label text="Last Name:" />
+        <TextField fx:id="lastNameField" />
+    </HBox>
+    <HBox spacing="5">
+        <Label prefHeight="18.0" prefWidth="66.0" text="Location:" />
+        <TextField fx:id="locationField" />
+    </HBox>
+    <HBox spacing="5">
+        <Label prefHeight="20.0" prefWidth="102.0" text="Web Address:" />
+        <TextField fx:id="webAddressField" />
+    </HBox>
+    <HBox spacing="5">
+        <Label text="Bio:" />
+        <TextArea fx:id="bioArea" />
+    </HBox>
+    <HBox spacing="5">
+        <Label text="Avatar:" />
+        <Button minWidth="110.0" onAction="#selectAvatarImage" prefHeight="32.0" prefWidth="146.0" text="Select Image" />
+      <Label text="1:1 aspect ratio recommended" />
+    </HBox>
+    <ImageView fx:id="avatarImageView" fitHeight="100.0" fitWidth="100.0" />
+    <HBox spacing="5">
+        <Label text="Header:" />
+        <Button minHeight="-Infinity" minWidth="120.0" onAction="#selectHeaderImage" text="Select Image" />
+      <Label text="3:1 aspect ratio recommended" />
+    </HBox>
+    <ImageView fx:id="headerImageView" fitHeight="110.0" fitWidth="330.0" />
+   <HBox prefHeight="43.0" prefWidth="444.0">
+      <children>
+         <Button fx:id="deleteAvatarButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="250.0" onAction="#deleteAvatar" prefHeight="31.0" prefWidth="132.0" text="Delete current avatar" />
+         <Button fx:id="deleteHeaderButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="250.0" onAction="#deleteHeader" prefHeight="31.0" prefWidth="225.0" text="Delete current header" />
+      </children>
+   </HBox>
+    <Button onAction="#saveProfile" prefWidth="172.0" text="Save" translateX="200.0" />
+    <Label fx:id="errorMessageLabel" prefHeight="18.0" prefWidth="384.0" styleClass="error-message" stylesheets="@login.css" translateX="20.0" />
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>

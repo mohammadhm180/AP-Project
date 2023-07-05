@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@HomeScene.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tweeter.SearchHashtagSceneController">
+   <top>
+      <HBox spacing="1.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="searchButton" mnemonicParsing="false" prefHeight="31.0" styleClass="button22" stylesheets="@style.css" text="Search" />
+            <Label prefHeight="35.0" prefWidth="39.0" text="       #">
+               <font>
+                  <Font size="29.0" />
+               </font>
+            </Label>
+            <TextField fx:id="searchTextField" prefWidth="196.0" />
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <ListView fx:id="tweetsByHashtagListview" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="1.0" top="1.0" />
+         </BorderPane.margin>
+      </ListView>
+   </center>
+   <padding>
+      <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+   </padding>
+   <bottom>
+      <Button fx:id="backButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="button22" stylesheets="@style.css" text="Back" BorderPane.alignment="CENTER" />
+   </bottom>
+</BorderPane>

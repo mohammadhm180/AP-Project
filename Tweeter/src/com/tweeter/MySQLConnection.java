@@ -1,4 +1,4 @@
-package com.twitter;
+package com.tweeter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

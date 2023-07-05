@@ -1,4 +1,4 @@
-package com.twitter;
+package com.tweeter;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -138,11 +138,10 @@ public class ClientThread implements Runnable {
                     throw new RuntimeException(e);
                 }
 
-            } else if (choice.equals("setBio")) {
+            } else if (choice.equals("updateUser")) {
                 try {
                     User user = (User) OIS.readObject();
-                    String result = setBio(user);
-                    OOS.writeObject(result);
+                    database.updateUser(user);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {
@@ -154,8 +153,7 @@ public class ClientThread implements Runnable {
                 try {
                     String follower = (String) OIS.readObject();
                     String following = (String) OIS.readObject();
-                    String result = follow(follower, following);
-                    OOS.writeObject(result);
+                    database.addFollowInfo(follower, following);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {
@@ -167,8 +165,7 @@ public class ClientThread implements Runnable {
                 try {
                     String follower = (String) OIS.readObject();
                     String following = (String) OIS.readObject();
-                    String result = unfollow(follower, following);
-                    OOS.writeObject(result);
+                    database.removeFollowInfo(follower, following);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {
@@ -179,8 +176,7 @@ public class ClientThread implements Runnable {
             } else if (choice.equals("addTweet")) {
                 try {
                     Tweet tweet = (Tweet) OIS.readObject();
-                    String result = addTweet(tweet);
-                    OOS.writeObject(result);
+                    addTweet(tweet);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {
@@ -297,7 +293,46 @@ public class ClientThread implements Runnable {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+            }  else if (choice.equals("incompleteUserFetch")) {
+                try {
+                    String username = (String) OIS.readObject();
+                    User user = database.incompleteUserFetch(username);
+                    OOS.writeObject(user);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }  else if (choice.equals("isLiked")) {
+                isLiked();
+            }  else if (choice.equals("fetchClient")) {
+                fetchClient();
             }
+        }
+    }
+
+    public void isLiked(){
+        try {
+            String tweetID = (String) OIS.readObject();
+            String doer = (String) OIS.readObject();
+            PreparedStatement isLikeStm = conn.prepareStatement("SELECT tweetID FROM likeInfo WHERE tweetID=? AND likerID=?");
+            isLikeStm.setString(1, tweetID);
+            isLikeStm.setString(2, doer);
+            ResultSet isLikedRs = isLikeStm.executeQuery();
+            if(isLikedRs.next()){
+                OOS.writeObject(new String("yes"));
+            }else{
+                OOS.writeObject(new String("no"));
+            }
+            isLikeStm.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -333,7 +368,7 @@ public class ClientThread implements Runnable {
                 return;
             }
         }
-        if (user.getPhoneNumber().length() < 7 || user.getPhoneNumber().length() > 15) {
+        if ((user.getPhoneNumber().length() < 7 || user.getPhoneNumber().length() > 15) && !user.getPhoneNumber().equals("")) {
             OOS.writeObject(new String("phone number does not seem to be fine"));
             return;
         }
@@ -366,6 +401,19 @@ public class ClientThread implements Runnable {
         OOS.writeObject(user);
     }
 
+    public void fetchClient(){
+        try {
+            String username = (String) OIS.readObject();
+            User user = database.fetchClient(username);
+            OOS.writeObject(user);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public void checkToken(String token) throws IOException, SQLException {
         String username = UserAuthenticator.validateToken(token);
         if (username == null) {
@@ -398,6 +446,8 @@ public class ClientThread implements Runnable {
     }
 
     public String emailChecker(String email) throws SQLException {
+        if(email.equals(""))
+            return "valid";
         //checking if the email is in use or not
         Statement stm = conn.createStatement();
         ResultSet rs = stm.executeQuery("SELECT email FROM users");
@@ -454,7 +504,6 @@ public class ClientThread implements Runnable {
             }
         }
         hashtagStm.close();
-        ObjectOutputStream OOS = new ObjectOutputStream(client.getOutputStream());
         OOS.writeObject(tweets);
     }
 
@@ -593,30 +642,31 @@ public class ClientThread implements Runnable {
 
     public void like() throws SQLException, IOException, ClassNotFoundException {
         String tweetID = (String) OIS.readObject();
+        String doer=(String) OIS.readObject();
         try {
             Tweet tweet = database.getTweet(tweetID);
-            database.like(tweet);
+            database.like(tweet,doer);
             return;
         } catch (SQLException e) {
             //ignore
         }
         try {
             Quote quote = database.getQuote(tweetID);
-            database.like(quote);
+            database.like(quote,doer);
             return;
         } catch (SQLException e) {
             //ignore
         }
         try {
             Reply reply = database.getReply(tweetID);
-            database.like(reply);
+            database.like(reply,doer);
             return;
         } catch (SQLException e) {
             //ignore
         }
         try {
             Vote vote = database.getVote(tweetID);
-            database.like(vote);
+            database.like(vote,doer);
             return;
         } catch (SQLException e) {
             //ignore
@@ -625,30 +675,31 @@ public class ClientThread implements Runnable {
 
     public void unlike() throws SQLException, IOException, ClassNotFoundException {
         String tweetID = (String) OIS.readObject();
+        String doer=(String) OIS.readObject();
         try {
             Tweet tweet = database.getTweet(tweetID);
-            database.unLike(tweet);
+            database.unLike(tweet,doer);
             return;
         } catch (SQLException e) {
             //ignore
         }
         try {
             Quote quote = database.getQuote(tweetID);
-            database.unLike(quote);
+            database.unLike(quote,doer);
             return;
         } catch (SQLException e) {
             //ignore
         }
         try {
             Reply reply = database.getReply(tweetID);
-            database.unLike(reply);
+            database.unLike(reply,doer);
             return;
         } catch (SQLException e) {
             //ignore
         }
         try {
             Vote vote = database.getVote(tweetID);
-            database.unLike(vote);
+            database.unLike(vote,doer);
             return;
         } catch (SQLException e) {
             //ignore
@@ -660,46 +711,33 @@ public class ClientThread implements Runnable {
         OOS.writeObject(tweets);
     }
 
-    public String setBio(User user) throws SQLException {
-        /*the bio is set in frontend and the user object is passed to this method to check the conditions for bio*/
-        if (user.getBio().length() > 160) {
-            return "bio has a maximum of 160 characters";
-        } else {
-            database.updateUser(user);
-            return "bio has been updated successfully";
+
+
+    public void addTweet(Tweet tweet) throws SQLException {
+        for (String hashtag:tweet.getHashtag()){
+            PreparedStatement addStatement = conn.prepareStatement("INSERT INTO hashtagInfo(tweetID,hashtagName ,hashtagYear ,hashtagMonth ,hashtagDay ,hashtagHour ,hashtagMinute ) VALUES (?,?,?,?,?,?,?)");
+            addStatement.setString(1,tweet.getTweetID());
+            addStatement.setString(2,hashtag);
+            addStatement.setInt(3,tweet.getTweetDate().getYear());
+            addStatement.setInt(4,tweet.getTweetDate().getMonthValue());
+            addStatement.setInt(5,tweet.getTweetDate().getDayOfMonth());
+            addStatement.setInt(6,tweet.getTweetDate().getHour());
+            addStatement.setInt(7,tweet.getTweetDate().getMinute());
+            addStatement.executeUpdate();
+            addStatement.close();
         }
-    }
 
-    public String follow(String follower, String following) throws SQLException {
-        database.addFollowInfo(follower, following);
-        return "success";
-    }
 
-    public String unfollow(String follower, String following) throws SQLException {
-        database.removeFollowInfo(follower, following);
-        return "success";
-    }
-
-    public String addTweet(Tweet tweet) throws SQLException {
-        if (tweet.getText().length() > 280) {
-            return "tweet text has a maximum of 280 characters";
+        if (tweet instanceof Retweet) {
+            database.addRetweet((Retweet) tweet);
+        } else if (tweet instanceof Reply) {
+            database.addReply((Reply) tweet);
+        } else if (tweet instanceof Quote) {
+            database.addQuote((Quote) tweet);
+        } else if (tweet instanceof Vote) {
+            database.addVote((Vote) tweet);
         } else {
-            if (tweet instanceof Retweet) {
-                database.addRetweet((Retweet) tweet);
-                return "tweeted successfully";
-            } else if (tweet instanceof Reply) {
-                database.addReply((Reply) tweet);
-                return "tweeted successfully";
-            } else if (tweet instanceof Quote) {
-                database.addQuote((Quote) tweet);
-                return "tweeted successfully";
-            } else if (tweet instanceof Vote) {
-                database.addVote((Vote) tweet);
-                return "tweeted successfully";
-            } else {
-                database.addTweet(tweet);
-                return "tweeted successfully";
-            }
+            database.addTweet(tweet);
         }
     }
 

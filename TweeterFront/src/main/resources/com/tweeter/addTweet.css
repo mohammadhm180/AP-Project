@@ -1,0 +1,29 @@
+
+.root {
+    -fx-padding: 20;
+    -fx-spacing: 10;
+    -fx-background-color: #f4f4f4;
+}
+
+.text-area {
+    -fx-pref-height: 100;
+    -fx-font-size: 14px;
+}
+
+.button-bar {
+    -fx-spacing: 10;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.button {
+    -fx-min-width: 80;
+    -fx-font-size: 14px;
+}
+
+.button:hover {
+    -fx-background-color: #dddddd;
+}
+
+.button:pressed {
+    -fx-background-color: #bbbbbb;
+}
