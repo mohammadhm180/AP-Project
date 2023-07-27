@@ -2,7 +2,7 @@
 
 ## Description
 This is the final project for advanced programming course at AUT.
-The purpose was to build a desktop application like Tweeter written in Java and JavaFX.
+The purpose was to build a desktop application like Twitter written in Java and JavaFX.
 
 ## Screenshots
 ![Signin page](photos/signIn.png)
